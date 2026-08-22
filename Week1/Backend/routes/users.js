@@ -12,6 +12,13 @@ const userIdParamsSchema = z.object({
 
 const updateUserSchema = createUserSchema.partial();
 
+const getValidationDetails = (zodError) => {
+  return zodError.issues.map((issue) => ({
+    field: issue.path.join("."),
+    message: issue.message,
+  }));
+};
+
 let users = [
   {
     id: 1,
@@ -56,14 +63,12 @@ async function userRoutes(fastify, options) {
   fastify.post("/", async (request, reply) => {
     const result = createUserSchema.safeParse(request.body);
     if (!result.success) {
-      reply.code(422).send({
-        message: "Validation failed",
-        errors: result.error.issues.map((issue) => ({
-          field: issue.path.join("."),
-          message: issue.message,
-        })),
-      });
-      return;
+      throw new AppError(
+        "Validation failed",
+        422,
+        "VALIDATION_ERROR",
+        getValidationDetails(result.error),
+      );
     }
     const userId = users.length + 1;
     const validateData = result.data;
@@ -75,26 +80,17 @@ async function userRoutes(fastify, options) {
   fastify.put("/:id", async (request, reply) => {
     const validateParams = userIdParamsSchema.safeParse(request.params);
     const validateBody = createUserSchema.safeParse(request.body);
-    if (!validateParams.success) {
-      reply.code(422).send({
-        message: "Validation failed",
-        errors: validateParams.error.issues.map((issue) => ({
-          field: issue.path.join("."),
-          message: issue.message,
-        })),
-      });
-      return;
+    if (!validateParams.success || !validateBody.success) {
+      throw new AppError(
+        "Validation failed",
+        422,
+        "VALIDATION_ERROR",
+        getValidationDetails(
+          !validateParams.success ? validateParams.error : validateBody.error,
+        ),
+      );
     }
-    if (!validateBody.success) {
-      reply.code(422).send({
-        message: "Validation failed",
-        errors: validateBody.error.issues.map((issue) => ({
-          field: issue.path.join("."),
-          message: issue.message,
-        })),
-      });
-      return;
-    }
+  
     const user = users.find((user) => user.id === validateParams.data.id);
     if (!user) {
       throw new AppError("User not found", 404, "USER_NOT_FOUND");
@@ -108,30 +104,18 @@ async function userRoutes(fastify, options) {
   fastify.patch("/:id", async (request, reply) => {
     const validateParams = userIdParamsSchema.safeParse(request.params);
     const validateBody = updateUserSchema.safeParse(request.body);
-    if (!validateParams.success) {
-      reply.code(422).send({
-        message: "Validation failed",
-        errors: validateParams.error.issues.map((issue) => ({
-          field: issue.path.join("."),
-          message: issue.message,
-        })),
-      });
-      return;
+    if (!validateParams.success || !validateBody.success) {
+      throw new AppError(
+        "Validation failed",
+        422,
+        "VALIDATION_ERROR",
+        getValidationDetails(validateParams.error),
+      );
     }
-    if (!validateBody.success) {
-      reply.code(422).send({
-        message: "Validation failed",
-        errors: validateBody.error.issues.map((issue) => ({
-          field: issue.path.join("."),
-          message: issue.message,
-        })),
-      });
-      return;
-    }
+
     const user = users.find((user) => user.id === validateParams.data.id);
     if (!user) {
-      reply.code(404).send({ message: "User not found" });
-      return;
+      throw new AppError("User not found", 404, "USER_NOT_FOUND");
     }
     const { name, age } = validateBody.data;
     if (name !== undefined) {
@@ -145,21 +129,18 @@ async function userRoutes(fastify, options) {
   fastify.delete("/:id", async (request, reply) => {
     const validateParams = userIdParamsSchema.safeParse(request.params);
     if (!validateParams.success) {
-      reply.code(422).send({
-        message: "Validation failed",
-        errors: validateParams.error.issues.map((issue) => ({
-          field: issue.path.join("."),
-          message: issue.message,
-        })),
-      });
-      return;
+      throw new AppError(
+        "Validation failed",
+        422,
+        "VALIDATION_ERROR",
+        getValidationDetails(validateParams.error),
+      );
     }
     const userIndex = users.findIndex(
       (user) => user.id === validateParams.data.id,
     );
     if (userIndex === -1) {
-      reply.code(404).send({ message: "User not found" });
-      return;
+      throw new AppError("User not found", 404, "USER_NOT_FOUND");
     }
     users.splice(userIndex, 1);
     reply.code(204).send();

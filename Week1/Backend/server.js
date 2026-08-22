@@ -25,6 +25,13 @@ fastify.setErrorHandler((error, request, reply) => {
   });
 });
 
+fastify.setNotFoundHandler((request, reply) => {
+  return reply.code(404).send({
+    code: "ROUTE_NOT_FOUND",
+    message: "Route not found",
+  });
+});
+
 fastify.register(swagger, {
   openapi: {
     info: {
