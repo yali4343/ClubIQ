@@ -90,7 +90,7 @@ async function userRoutes(fastify, options) {
         ),
       );
     }
-  
+
     const user = users.find((user) => user.id === validateParams.data.id);
     if (!user) {
       throw new AppError("User not found", 404, "USER_NOT_FOUND");
@@ -109,7 +109,9 @@ async function userRoutes(fastify, options) {
         "Validation failed",
         422,
         "VALIDATION_ERROR",
-        getValidationDetails(validateParams.error),
+        getValidationDetails(
+          !validateParams.success ? validateParams.error : validateBody.error,
+        ),
       );
     }
 
