@@ -1,10 +1,28 @@
 import Fastify from "fastify";
+import AppError from "./errors/AppError.js";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import userRoutes from "./routes/users.js";
 
 const fastify = Fastify({
   logger: true,
+});
+
+fastify.setErrorHandler((error, request, reply) => {
+  if (error instanceof AppError) {
+    return reply.code(error.statusCode).send({
+      code: error.code,
+      message: error.message,
+      ...(error.details && { details: error.details }),
+    });
+  }
+
+  request.log.error(error);
+
+  return reply.code(500).send({
+    code: "INTERNAL_SERVER_ERROR",
+    message: "An unexpected error occurred",
+  });
 });
 
 fastify.register(swagger, {

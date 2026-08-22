@@ -1,4 +1,5 @@
 import { z } from "zod";
+import AppError from "../errors/AppError.js";
 
 const createUserSchema = z.object({
   name: z.string().min(2).max(50),
@@ -96,8 +97,7 @@ async function userRoutes(fastify, options) {
     }
     const user = users.find((user) => user.id === validateParams.data.id);
     if (!user) {
-      reply.code(404).send({ message: "User not found" });
-      return;
+      throw new AppError("User not found", 404, "USER_NOT_FOUND");
     }
     const { name, age } = validateBody.data;
     user.name = name;
