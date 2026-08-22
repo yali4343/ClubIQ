@@ -1,0 +1,63 @@
+import Fastify from "fastify";
+import swagger from "@fastify/swagger";
+import swaggerUi from "@fastify/swagger-ui";
+import userRoutes from "./routes/users.js";
+
+const fastify = Fastify({
+  logger: true,
+});
+
+fastify.register(swagger, {
+  openapi: {
+    info: {
+      title: "My API",
+      description: "REST API documentation",
+      version: "1.0.0",
+    },
+    servers: [
+      {
+        url: "http://localhost:3000",
+        description: "Development server",
+      },
+    ],
+  },
+});
+
+await fastify.register(swaggerUi, {
+  routePrefix: "documentation",
+});
+
+fastify.addHook("onRequest", async (request, reply) => {
+  console.log("onRequest:", request.method, request.url);
+});
+
+fastify.addHook("preHandler", async (request, reply) => {
+  console.log("preHandler:", request.method, request.url);
+});
+
+fastify.register(userRoutes, {
+  prefix: "/api/users",
+});
+
+fastify.get("/search", async (request, reply) => {
+  const page = request.query.page ?? "1";
+  const limit = request.query.limit ?? "10";
+
+  return { page, limit };
+});
+
+const port = process.env.PORT || 3000;
+
+await fastify.listen({
+  port: Number(port),
+});
+
+const shutdown = async () => {
+  console.log("Shutting down server...");
+  await fastify.close();
+
+  console.log("Server closed");
+};
+
+process.on("SIGINT", shutdown);
+process.on("SIGTERM", shutdown);
