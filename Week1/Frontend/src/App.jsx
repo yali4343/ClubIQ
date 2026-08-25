@@ -4,7 +4,7 @@ function App() {
   const [users, setUsers] = useState([]);
 
   async function loadUsers() {
-    const response = await fetch("http://localhost:3000/users");
+    const response = await fetch("http://localhost:3000/api/users");
 
     const data = await response.json();
 

@@ -3,6 +3,7 @@ import AppError from "./errors/AppError.js";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import userRoutes from "./routes/users.js";
+import cors from "@fastify/cors";
 
 const fastify = Fastify({
   logger: true,
@@ -46,6 +47,10 @@ fastify.register(swagger, {
       },
     ],
   },
+});
+
+await fastify.register(cors, {
+  origin: "http://localhost:5173",
 });
 
 await fastify.register(swaggerUi, {
