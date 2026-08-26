@@ -26,6 +26,13 @@ function App() {
     }
   }
 
+  function resetForm() {
+    setName("");
+    setAge("");
+    setEditingUserId(null);
+    setError("");
+  }
+
   useEffect(() => {
     loadUsers();
   }, []);
@@ -116,27 +123,33 @@ function App() {
     <div>
       <h1>Users</h1>
 
+      <h2>
+        {editingUserId !== null ? "Edit User" : "Create User"}
+      </h2>
+
       <form onSubmit={handleSubmit}>
         <div>
-          <label>
-            Name:
-            <input
-              type="text"
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-            />
-          </label>
+          <label htmlFor="name">Name:</label>
+
+          <input
+            id="name"
+            name="name"
+            type="text"
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+          />
         </div>
 
         <div>
-          <label>
-            Age:
-            <input
-              type="number"
-              value={age}
-              onChange={(event) => setAge(event.target.value)}
-            />
-          </label>
+          <label htmlFor="age">Age:</label>
+
+          <input
+            id="age"
+            name="age"
+            type="number"
+            value={age}
+            onChange={(event) => setAge(event.target.value)}
+          />
         </div>
 
         <button type="submit" disabled={isSubmitting}>
@@ -146,6 +159,16 @@ function App() {
               ? "Update User"
               : "Create User"}
         </button>
+
+        {editingUserId !== null && (
+          <button
+            type="button"
+            onClick={resetForm}
+            disabled={isSubmitting}
+          >
+            Cancel
+          </button>
+        )}
       </form>
 
       {error && <p>{error}</p>}
@@ -158,13 +181,9 @@ function App() {
             {user.name} - {user.age}
           </span>
 
-          <button type="button" onClick={() => handleEdit(user)}>
-            Edit
-          </button>
+          <button onClick={() => handleEdit(user)}>Edit</button>
 
-          <button type="button" onClick={() => handleDelete(user.id)}>
-            Delete
-          </button>
+          <button onClick={() => handleDelete(user.id)}>Delete</button>
         </div>
       ))}
     </div>
