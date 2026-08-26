@@ -1,24 +1,171 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 function App() {
   const [users, setUsers] = useState([]);
 
+  const [name, setName] = useState("");
+  const [age, setAge] = useState("");
+
+  const [editingUserId, setEditingUserId] = useState(null);
+
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   async function loadUsers() {
-    const response = await fetch("http://localhost:3000/api/users");
+    try {
+      const response = await fetch("http://localhost:3000/users");
 
-    const data = await response.json();
+      if (!response.ok) {
+        throw new Error("Failed to load users");
+      }
 
-    setUsers(data);
+      const data = await response.json();
+      setUsers(data);
+    } catch (error) {
+      setError(error.message);
+    }
+  }
+
+  useEffect(() => {
+    loadUsers();
+  }, []);
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+
+    setError("");
+    setIsSubmitting(true);
+
+    try {
+      const isEditing = editingUserId !== null;
+
+      const url = isEditing
+        ? `http://localhost:3000/users/${editingUserId}`
+        : "http://localhost:3000/users";
+
+      const method = isEditing ? "PATCH" : "POST";
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          age: Number(age),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to save user");
+      }
+
+      if (isEditing) {
+        setUsers((currentUsers) =>
+          currentUsers.map((user) =>
+            user.id === editingUserId ? data : user,
+          ),
+        );
+      } else {
+        setUsers((currentUsers) => [...currentUsers, data]);
+      }
+
+      setName("");
+      setAge("");
+      setEditingUserId(null);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  function handleEdit(user) {
+    setEditingUserId(user.id);
+    setName(user.name);
+    setAge(String(user.age));
+    setError("");
+  }
+
+  async function handleDelete(userId) {
+    setError("");
+
+    try {
+      const response = await fetch(
+        `http://localhost:3000/users/${userId}`,
+        {
+          method: "DELETE",
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to delete user");
+      }
+
+      setUsers((currentUsers) =>
+        currentUsers.filter((user) => user.id !== userId),
+      );
+    } catch (error) {
+      setError(error.message);
+    }
   }
 
   return (
     <div>
       <h1>Users</h1>
 
-      <button onClick={loadUsers}>Load Users</button>
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label>
+            Name:
+            <input
+              type="text"
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+            />
+          </label>
+        </div>
+
+        <div>
+          <label>
+            Age:
+            <input
+              type="number"
+              value={age}
+              onChange={(event) => setAge(event.target.value)}
+            />
+          </label>
+        </div>
+
+        <button type="submit" disabled={isSubmitting}>
+          {isSubmitting
+            ? "Saving..."
+            : editingUserId !== null
+              ? "Update User"
+              : "Create User"}
+        </button>
+      </form>
+
+      {error && <p>{error}</p>}
+
+      <hr />
 
       {users.map((user) => (
-        <div key={user.id}>{user.name}</div>
+        <div key={user.id}>
+          <span>
+            {user.name} - {user.age}
+          </span>
+
+          <button type="button" onClick={() => handleEdit(user)}>
+            Edit
+          </button>
+
+          <button type="button" onClick={() => handleDelete(user.id)}>
+            Delete
+          </button>
+        </div>
       ))}
     </div>
   );

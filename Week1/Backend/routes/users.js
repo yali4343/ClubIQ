@@ -70,11 +70,14 @@ async function userRoutes(fastify, options) {
         getValidationDetails(result.error),
       );
     }
-    const userId = users.length + 1;
+    const userId = users.reduce(
+      (highestId, currentUser) => Math.max(highestId, currentUser.id),
+      0,
+    ) + 1;
     const validateData = result.data;
     const user = { id: userId, ...validateData };
     users.push(user);
-    reply.code(201).send({ message: "User created", user });
+    reply.code(201).send(user);
   });
 
   fastify.put("/:id", async (request, reply) => {
@@ -98,7 +101,7 @@ async function userRoutes(fastify, options) {
     const { name, age } = validateBody.data;
     user.name = name;
     user.age = age;
-    reply.code(200).send({ message: "User updated", user });
+    reply.code(200).send(user);
   });
 
   fastify.patch("/:id", async (request, reply) => {
@@ -126,7 +129,7 @@ async function userRoutes(fastify, options) {
     if (age !== undefined) {
       user.age = age;
     }
-    reply.code(200).send({ message: "User updated", user });
+    reply.code(200).send(user);
   });
   fastify.delete("/:id", async (request, reply) => {
     const validateParams = userIdParamsSchema.safeParse(request.params);

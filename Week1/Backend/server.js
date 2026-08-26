@@ -51,6 +51,7 @@ fastify.register(swagger, {
 
 await fastify.register(cors, {
   origin: "http://localhost:5173",
+  methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
 });
 
 await fastify.register(swaggerUi, {
@@ -66,7 +67,7 @@ fastify.addHook("preHandler", async (request, reply) => {
 });
 
 fastify.register(userRoutes, {
-  prefix: "/api/users",
+  prefix: "/users",
 });
 
 fastify.get("/search", async (request, reply) => {
