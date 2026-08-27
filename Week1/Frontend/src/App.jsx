@@ -176,7 +176,7 @@ function App() {
       <hr />
 
       {users.length === 0 ? (
-        <p>No users found.</p>
+        <p>No users found. Create a user to get started.</p>
       ) : (
         users.map((user) => (
           <div key={user.id}>
