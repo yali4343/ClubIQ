@@ -121,7 +121,7 @@ function App() {
 
   return (
     <div>
-      <h1>Users</h1>
+      <h1>Users ({users.length})</h1>
 
       <h2>
         {editingUserId !== null ? "Edit User" : "Create User"}
