@@ -97,6 +97,13 @@ function App() {
   }
 
   async function handleDelete(userId) {
+    const shouldDelete = window.confirm("Are you sure you want to delete this user?",
+    );
+
+    if (shouldDelete === false){
+      return;
+    }
+    
     setError("");
 
     try {
