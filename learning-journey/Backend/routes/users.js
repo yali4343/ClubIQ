@@ -39,6 +39,39 @@ function findUserIndexById(users, userId) {
   return users.findIndex((user) => user.id === userId);
 }
 
+function validateUserRequest(request, bodySchema) {
+  const paramsValidationResult = userIdParamsSchema.safeParse(request.params);
+  const bodyValidationResult = bodySchema.safeParse(request.body);
+
+  if (!paramsValidationResult.success || !bodyValidationResult.success) {
+    throw new AppError(
+      "Validation failed",
+      422,
+      "VALIDATION_ERROR",
+      getValidationDetails(
+        !paramsValidationResult.success
+          ? paramsValidationResult.error
+          : bodyValidationResult.error,
+      ),
+    );
+  }
+
+  return {
+    userId: paramsValidationResult.data.id,
+    validatedBody: bodyValidationResult.data,
+  };
+}
+
+function getExistingUserOrThrow(users, userId) {
+  const existingUser = findUserById(users, userId);
+
+  if (!existingUser) {
+    throw new AppError("User not found", 404, "USER_NOT_FOUND");
+  }
+
+  return existingUser;
+}
+
 async function userRoutes(fastify, options) {
   fastify.get(
     "/",
@@ -96,29 +129,14 @@ async function userRoutes(fastify, options) {
   });
 
   fastify.put("/:id", async (request, reply) => {
-    const paramsValidationResult = userIdParamsSchema.safeParse(request.params);
-    const bodyValidationResult = createUserSchema.safeParse(request.body);
+    const { userId, validatedBody } = validateUserRequest(
+      request,
+      createUserSchema,
+    );
 
-    if (!paramsValidationResult.success || !bodyValidationResult.success) {
-      throw new AppError(
-        "Validation failed",
-        422,
-        "VALIDATION_ERROR",
-        getValidationDetails(
-          !paramsValidationResult.success
-            ? paramsValidationResult.error
-            : bodyValidationResult.error,
-        ),
-      );
-    }
+    const existingUser = getExistingUserOrThrow(users, userId);
 
-    const existingUser = findUserById(users, paramsValidationResult.data.id);
-
-    if (!existingUser) {
-      throw new AppError("User not found", 404, "USER_NOT_FOUND");
-    }
-
-    const { name, age } = bodyValidationResult.data;
+    const { name, age } = validatedBody;
 
     existingUser.name = name;
     existingUser.age = age;
@@ -127,29 +145,14 @@ async function userRoutes(fastify, options) {
   });
 
   fastify.patch("/:id", async (request, reply) => {
-    const paramsValidationResult = userIdParamsSchema.safeParse(request.params);
-    const bodyValidationResult = updateUserSchema.safeParse(request.body);
+    const { userId, validatedBody } = validateUserRequest(
+      request,
+      updateUserSchema,
+    );
 
-    if (!paramsValidationResult.success || !bodyValidationResult.success) {
-      throw new AppError(
-        "Validation failed",
-        422,
-        "VALIDATION_ERROR",
-        getValidationDetails(
-          !paramsValidationResult.success
-            ? paramsValidationResult.error
-            : bodyValidationResult.error,
-        ),
-      );
-    }
+    const existingUser = getExistingUserOrThrow(users, userId);
 
-    const existingUser = findUserById(users, paramsValidationResult.data.id);
-
-    if (!existingUser) {
-      throw new AppError("User not found", 404, "USER_NOT_FOUND");
-    }
-
-    const { name, age } = bodyValidationResult.data;
+    const { name, age } = validatedBody;
 
     if (name !== undefined) {
       existingUser.name = name;
