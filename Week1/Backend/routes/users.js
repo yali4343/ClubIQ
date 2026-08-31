@@ -1,23 +1,11 @@
-import { z } from "zod";
 import AppError from "../errors/AppError.js";
 
-const createUserSchema = z.object({
-  name: z.string().min(2).max(50),
-  age: z.number().int().min(0).max(120),
-});
-
-const userIdParamsSchema = z.object({
-  id: z.coerce.number().int().positive(),
-});
-
-const updateUserSchema = createUserSchema.partial();
-
-const getValidationDetails = (zodError) => {
-  return zodError.issues.map((issue) => ({
-    field: issue.path.join("."),
-    message: issue.message,
-  }));
-};
+import {
+  createUserSchema,
+  userIdParamsSchema,
+  updateUserSchema,
+  getValidationDetails,
+} from "./userValidation.js";
 
 let users = [
   {
