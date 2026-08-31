@@ -83,12 +83,18 @@ await fastify.listen({
   port: Number(port),
 });
 
-const shutdown = async () => {
-  console.log("Shutting down server...");
-  await fastify.close();
+const shutdown = async (signal) => {
+  console.log(`${signal} received. Shutting down server...`);
 
-  console.log("Server closed");
+  try {
+    await fastify.close();
+    console.log("Server closed");
+    process.exit(0);
+  } catch (error) {
+    fastify.log.error(error);
+    process.exit(1);
+  }
 };
 
-process.on("SIGINT", shutdown);
-process.on("SIGTERM", shutdown);
+process.on("SIGINT", () => shutdown("SIGINT"));
+process.on("SIGTERM", () => shutdown("SIGTERM"));
