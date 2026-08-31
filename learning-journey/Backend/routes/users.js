@@ -22,6 +22,23 @@ let users = [
   },
 ];
 
+function getNextUserId(users) {
+  return (
+    users.reduce(
+      (highestId, currentUser) => Math.max(highestId, currentUser.id),
+      0,
+    ) + 1
+  );
+}
+
+function findUserById(users, userId) {
+  return users.find((user) => user.id === userId);
+}
+
+function findUserIndexById(users, userId) {
+  return users.findIndex((user) => user.id === userId);
+}
+
 async function userRoutes(fastify, options) {
   fastify.get(
     "/",
@@ -55,6 +72,7 @@ async function userRoutes(fastify, options) {
 
   fastify.post("/", async (request, reply) => {
     const bodyValidationResult = createUserSchema.safeParse(request.body);
+
     if (!bodyValidationResult.success) {
       throw new AppError(
         "Validation failed",
@@ -63,20 +81,24 @@ async function userRoutes(fastify, options) {
         getValidationDetails(bodyValidationResult.error),
       );
     }
-    const userId =
-      users.reduce(
-        (highestId, currentUser) => Math.max(highestId, currentUser.id),
-        0,
-      ) + 1;
+
+    const newUserId = getNextUserId(users);
     const validatedUserData = bodyValidationResult.data;
-    const newUser = { id: userId, ...validatedUserData };
+
+    const newUser = {
+      id: newUserId,
+      ...validatedUserData,
+    };
+
     users.push(newUser);
+
     reply.code(201).send(newUser);
   });
 
   fastify.put("/:id", async (request, reply) => {
     const paramsValidationResult = userIdParamsSchema.safeParse(request.params);
     const bodyValidationResult = createUserSchema.safeParse(request.body);
+
     if (!paramsValidationResult.success || !bodyValidationResult.success) {
       throw new AppError(
         "Validation failed",
@@ -90,21 +112,24 @@ async function userRoutes(fastify, options) {
       );
     }
 
-    const existingUser = users.find(
-      (user) => user.id === paramsValidationResult.data.id,
-    );
+    const existingUser = findUserById(users, paramsValidationResult.data.id);
+
     if (!existingUser) {
       throw new AppError("User not found", 404, "USER_NOT_FOUND");
     }
+
     const { name, age } = bodyValidationResult.data;
+
     existingUser.name = name;
     existingUser.age = age;
+
     reply.code(200).send(existingUser);
   });
 
   fastify.patch("/:id", async (request, reply) => {
     const paramsValidationResult = userIdParamsSchema.safeParse(request.params);
     const bodyValidationResult = updateUserSchema.safeParse(request.body);
+
     if (!paramsValidationResult.success || !bodyValidationResult.success) {
       throw new AppError(
         "Validation failed",
@@ -118,23 +143,28 @@ async function userRoutes(fastify, options) {
       );
     }
 
-    const user = users.find(
-      (user) => user.id === paramsValidationResult.data.id,
-    );
-    if (!user) {
+    const existingUser = findUserById(users, paramsValidationResult.data.id);
+
+    if (!existingUser) {
       throw new AppError("User not found", 404, "USER_NOT_FOUND");
     }
+
     const { name, age } = bodyValidationResult.data;
+
     if (name !== undefined) {
-      user.name = name;
+      existingUser.name = name;
     }
+
     if (age !== undefined) {
-      user.age = age;
+      existingUser.age = age;
     }
-    reply.code(200).send(user);
+
+    reply.code(200).send(existingUser);
   });
+
   fastify.delete("/:id", async (request, reply) => {
     const paramsValidationResult = userIdParamsSchema.safeParse(request.params);
+
     if (!paramsValidationResult.success) {
       throw new AppError(
         "Validation failed",
@@ -143,13 +173,15 @@ async function userRoutes(fastify, options) {
         getValidationDetails(paramsValidationResult.error),
       );
     }
-    const userIndex = users.findIndex(
-      (user) => user.id === paramsValidationResult.data.id,
-    );
+
+    const userIndex = findUserIndexById(users, paramsValidationResult.data.id);
+
     if (userIndex === -1) {
       throw new AppError("User not found", 404, "USER_NOT_FOUND");
     }
+
     users.splice(userIndex, 1);
+
     reply.code(204).send();
   });
 }
