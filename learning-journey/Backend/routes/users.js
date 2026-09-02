@@ -43,10 +43,6 @@ function findUserById(users, userId) {
   return users.find((user) => user.id === userId);
 }
 
-function findUserIndexById(users, userId) {
-  return users.findIndex((user) => user.id === userId);
-}
-
 function validateUserRequest(request, bodySchema) {
   const paramsValidationResult = userIdParamsSchema.safeParse(request.params);
   const bodyValidationResult = bodySchema.safeParse(request.body);
@@ -93,7 +89,7 @@ async function userRoutes(fastify, options) {
         description: "Returns all users in the system",
         tags: ["Users"],
         response: {
-          [HTTP_STATUS.OK]: {
+          200: {
             type: "array",
             items: {
               type: "object",
@@ -135,7 +131,7 @@ async function userRoutes(fastify, options) {
       ...validatedUserData,
     };
 
-    users.push(newUser);
+    users = [...users, newUser];
 
     reply.code(HTTP_STATUS.CREATED).send(newUser);
   });
@@ -148,12 +144,14 @@ async function userRoutes(fastify, options) {
 
     const existingUser = getExistingUserOrThrow(users, userId);
 
-    const { name, age } = validatedBody;
+    const updatedUser = {
+      ...existingUser,
+      ...validatedBody,
+    };
 
-    existingUser.name = name;
-    existingUser.age = age;
+    users = users.map((user) => (user.id === userId ? updatedUser : user));
 
-    reply.code(HTTP_STATUS.OK).send(existingUser);
+    reply.code(HTTP_STATUS.OK).send(updatedUser);
   });
 
   fastify.patch("/:id", async (request, reply) => {
@@ -164,17 +162,14 @@ async function userRoutes(fastify, options) {
 
     const existingUser = getExistingUserOrThrow(users, userId);
 
-    const { name, age } = validatedBody;
+    const updatedUser = {
+      ...existingUser,
+      ...validatedBody,
+    };
 
-    if (name !== undefined) {
-      existingUser.name = name;
-    }
+    users = users.map((user) => (user.id === userId ? updatedUser : user));
 
-    if (age !== undefined) {
-      existingUser.age = age;
-    }
-
-    reply.code(HTTP_STATUS.OK).send(existingUser);
+    reply.code(HTTP_STATUS.OK).send(updatedUser);
   });
 
   fastify.delete("/:id", async (request, reply) => {
@@ -189,15 +184,13 @@ async function userRoutes(fastify, options) {
       );
     }
 
-    const userIndex = findUserIndexById(users, paramsValidationResult.data.id);
+    const userId = paramsValidationResult.data.id;
 
-    if (userIndex === -1) {
-      throw new AppError("User not found", 404, "USER_NOT_FOUND");
-    }
+    getExistingUserOrThrow(users, userId);
 
-    users.splice(userIndex, 1);
+    users = users.filter((user) => user.id !== userId);
 
-    reply.code(204).send();
+    reply.code(HTTP_STATUS.NO_CONTENT).send();
   });
 }
 
