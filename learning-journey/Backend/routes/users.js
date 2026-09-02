@@ -9,6 +9,14 @@ import {
 
 import { detailedUserFormatter, formatUsers } from "./userFormatters.js";
 
+const HTTP_STATUS = {
+  OK: 200,
+  CREATED: 201,
+  NO_CONTENT: 204,
+  NOT_FOUND: 404,
+  UNPROCESSABLE_ENTITY: 422,
+};
+
 let users = [
   {
     id: 1,
@@ -46,7 +54,7 @@ function validateUserRequest(request, bodySchema) {
   if (!paramsValidationResult.success || !bodyValidationResult.success) {
     throw new AppError(
       "Validation failed",
-      422,
+      HTTP_STATUS.UNPROCESSABLE_ENTITY,
       "VALIDATION_ERROR",
       getValidationDetails(
         !paramsValidationResult.success
@@ -66,7 +74,11 @@ function getExistingUserOrThrow(users, userId) {
   const existingUser = findUserById(users, userId);
 
   if (!existingUser) {
-    throw new AppError("User not found", 404, "USER_NOT_FOUND");
+    throw new AppError(
+      "User not found",
+      HTTP_STATUS.NOT_FOUND,
+      "USER_NOT_FOUND",
+    );
   }
 
   return existingUser;
@@ -81,7 +93,7 @@ async function userRoutes(fastify, options) {
         description: "Returns all users in the system",
         tags: ["Users"],
         response: {
-          200: {
+          [HTTP_STATUS.OK]: {
             type: "array",
             items: {
               type: "object",
@@ -99,7 +111,7 @@ async function userRoutes(fastify, options) {
     async (request, reply) => {
       const formattedUsers = formatUsers(users, detailedUserFormatter);
 
-      reply.code(200).send(formattedUsers);
+      reply.code(HTTP_STATUS.OK).send(formattedUsers);
     },
   );
 
@@ -109,7 +121,7 @@ async function userRoutes(fastify, options) {
     if (!bodyValidationResult.success) {
       throw new AppError(
         "Validation failed",
-        422,
+        HTTP_STATUS.UNPROCESSABLE_ENTITY,
         "VALIDATION_ERROR",
         getValidationDetails(bodyValidationResult.error),
       );
@@ -125,7 +137,7 @@ async function userRoutes(fastify, options) {
 
     users.push(newUser);
 
-    reply.code(201).send(newUser);
+    reply.code(HTTP_STATUS.CREATED).send(newUser);
   });
 
   fastify.put("/:id", async (request, reply) => {
@@ -141,7 +153,7 @@ async function userRoutes(fastify, options) {
     existingUser.name = name;
     existingUser.age = age;
 
-    reply.code(200).send(existingUser);
+    reply.code(HTTP_STATUS.OK).send(existingUser);
   });
 
   fastify.patch("/:id", async (request, reply) => {
@@ -162,7 +174,7 @@ async function userRoutes(fastify, options) {
       existingUser.age = age;
     }
 
-    reply.code(200).send(existingUser);
+    reply.code(HTTP_STATUS.OK).send(existingUser);
   });
 
   fastify.delete("/:id", async (request, reply) => {
@@ -171,7 +183,7 @@ async function userRoutes(fastify, options) {
     if (!paramsValidationResult.success) {
       throw new AppError(
         "Validation failed",
-        422,
+        HTTP_STATUS.UNPROCESSABLE_ENTITY,
         "VALIDATION_ERROR",
         getValidationDetails(paramsValidationResult.error),
       );
