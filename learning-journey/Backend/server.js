@@ -1,3 +1,4 @@
+import "reflect-metadata";
 import Fastify from "fastify";
 import AppError from "./errors/AppError.js";
 import swagger from "@fastify/swagger";
