@@ -1,11 +1,11 @@
-import { injectable } from "tsyringe";
-import { AppLogger } from "./AppLogger.js";
+import { inject, injectable } from "tsyringe";
+import type { Logger } from "./Logger.js";
 
 @injectable()
 export class StartupReporter {
-  constructor(private appLogger: AppLogger) {}
+  constructor(@inject("Logger") private logger: Logger) {}
 
   reportReady(): void {
-    this.appLogger.log("Server dependencies are ready");
+    this.logger.log("Server dependencies are ready");
   }
 }
