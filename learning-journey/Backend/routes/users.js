@@ -7,7 +7,7 @@ import {
   getValidationDetails,
 } from "./userValidation.js";
 
-import { detailedUserFormatter, formatUsers } from "./userFormatters.js";
+import { formatUsers } from "./userFormatters.js";
 
 const HTTP_STATUS = {
   OK: 200,
@@ -84,6 +84,8 @@ function getExistingUserOrThrow(users, userId) {
 }
 
 async function userRoutes(fastify, options) {
+  const { userFormatter } = options;
+
   fastify.get(
     "/",
     {
@@ -108,7 +110,7 @@ async function userRoutes(fastify, options) {
       },
     },
     async (request, reply) => {
-      const formattedUsers = formatUsers(users, detailedUserFormatter);
+      const formattedUsers = formatUsers(users, userFormatter);
 
       reply.code(HTTP_STATUS.OK).send(formattedUsers);
     },
