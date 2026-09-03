@@ -4,6 +4,7 @@ import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import userRoutes from "./routes/users.js";
 import cors from "@fastify/cors";
+import { detailedUserFormatter } from "./routes/userFormatters.js";
 
 const fastify = Fastify({
   logger: true,
@@ -68,6 +69,7 @@ fastify.addHook("preHandler", async (request, reply) => {
 
 fastify.register(userRoutes, {
   prefix: "/users",
+  userFormatter: detailedUserFormatter,
 });
 
 fastify.get("/search", async (request, reply) => {
