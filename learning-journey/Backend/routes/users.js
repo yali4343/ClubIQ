@@ -43,26 +43,29 @@ function findUserById(users, userId) {
   return users.find((user) => user.id === userId);
 }
 
-function validateUserRequest(request, bodySchema) {
-  const paramsValidationResult = userIdParamsSchema.safeParse(request.params);
-  const bodyValidationResult = bodySchema.safeParse(request.body);
+function parseOrThrow(schema, data) {
+  const validationResult = schema.safeParse(data);
 
-  if (!paramsValidationResult.success || !bodyValidationResult.success) {
+  if (!validationResult.success) {
     throw new AppError(
       "Validation failed",
       HTTP_STATUS.UNPROCESSABLE_ENTITY,
       "VALIDATION_ERROR",
-      getValidationDetails(
-        !paramsValidationResult.success
-          ? paramsValidationResult.error
-          : bodyValidationResult.error,
-      ),
+      getValidationDetails(validationResult.error),
     );
   }
 
+  return validationResult.data;
+}
+
+function validateUserRequest(request, bodySchema) {
+  const validatedParams = parseOrThrow(userIdParamsSchema, request.params);
+
+  const validatedBody = parseOrThrow(bodySchema, request.body);
+
   return {
-    userId: paramsValidationResult.data.id,
-    validatedBody: bodyValidationResult.data,
+    userId: validatedParams.id,
+    validatedBody,
   };
 }
 
@@ -112,19 +115,9 @@ async function userRoutes(fastify, options) {
   );
 
   fastify.post("/", async (request, reply) => {
-    const bodyValidationResult = createUserSchema.safeParse(request.body);
-
-    if (!bodyValidationResult.success) {
-      throw new AppError(
-        "Validation failed",
-        HTTP_STATUS.UNPROCESSABLE_ENTITY,
-        "VALIDATION_ERROR",
-        getValidationDetails(bodyValidationResult.error),
-      );
-    }
+    const validatedUserData = parseOrThrow(createUserSchema, request.body);
 
     const newUserId = getNextUserId(users);
-    const validatedUserData = bodyValidationResult.data;
 
     const newUser = {
       id: newUserId,
@@ -173,18 +166,9 @@ async function userRoutes(fastify, options) {
   });
 
   fastify.delete("/:id", async (request, reply) => {
-    const paramsValidationResult = userIdParamsSchema.safeParse(request.params);
+    const validatedParams = parseOrThrow(userIdParamsSchema, request.params);
 
-    if (!paramsValidationResult.success) {
-      throw new AppError(
-        "Validation failed",
-        HTTP_STATUS.UNPROCESSABLE_ENTITY,
-        "VALIDATION_ERROR",
-        getValidationDetails(paramsValidationResult.error),
-      );
-    }
-
-    const userId = paramsValidationResult.data.id;
+    const userId = validatedParams.id;
 
     getExistingUserOrThrow(users, userId);
 
