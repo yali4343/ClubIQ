@@ -1,6 +1,6 @@
 import { inject, injectable } from "tsyringe";
 import type { Logger } from "./logging/index.js";
-import { AppConfig } from "./AppConfig.js";
+import { AppConfig } from "./config/appConfig.types.js";
 
 @injectable()
 export class StartupReporter {
