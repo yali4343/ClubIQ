@@ -9,6 +9,10 @@ const secondLogger = container.resolve<Logger>("Logger");
 
 console.log("Same logger instance:", firstLogger === secondLogger);
 
+const startupMessage = container.resolve<string>("StartupMessage");
+
+console.log(startupMessage);
+
 const startupReporter = container.resolve(StartupReporter);
 
 startupReporter.reportReady();
