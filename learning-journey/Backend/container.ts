@@ -1,5 +1,5 @@
 import { Lifecycle, container } from "tsyringe";
-import { AppLogger } from "./AppLogger.js";
+import { AppLogger } from "./logging/AppLogger.js";
 
 import type { AppConfig } from "./AppConfig.js";
 

@@ -1,7 +1,7 @@
 import "reflect-metadata";
 
 import { container } from "./container.js";
-import type { Logger } from "./Logger.js";
+import type { Logger } from "./logging/Logger.js";
 import { StartupReporter } from "./StartupReporter.js";
 
 const firstLogger = container.resolve<Logger>("Logger");
