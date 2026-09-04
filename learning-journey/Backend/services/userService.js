@@ -1,5 +1,12 @@
 import { formatUsers } from "./userFormatters.js";
 
+const USER_SERVICE_ERROR = {
+  USER_NOT_FOUND: {
+    code: "USER_NOT_FOUND",
+    message: "User not found",
+  },
+};
+
 let users = [
   {
     id: 1,
@@ -53,7 +60,10 @@ function updateUser(userId, userData) {
   const existingUser = findUserByIdOrUndefined(userId);
 
   if (!existingUser) {
-    return null;
+    return {
+      ok: false,
+      error: USER_SERVICE_ERROR.USER_NOT_FOUND,
+    };
   }
 
   const updatedUser = {
@@ -63,19 +73,28 @@ function updateUser(userId, userData) {
 
   users = users.map((user) => (user.id === userId ? updatedUser : user));
 
-  return updatedUser;
+  return {
+    ok: true,
+    user: updatedUser,
+  };
 }
 
 function deleteUser(userId) {
   const existingUser = findUserByIdOrUndefined(userId);
 
   if (!existingUser) {
-    return null;
+    return {
+      ok: false,
+      error: USER_SERVICE_ERROR.USER_NOT_FOUND,
+    };
   }
 
   users = users.filter((user) => user.id !== userId);
 
-  return existingUser;
+  return {
+    ok: true,
+    data: existingUser,
+  };
 }
 
 export { getAllUsers, getFormattedUsers, createUser, updateUser, deleteUser };

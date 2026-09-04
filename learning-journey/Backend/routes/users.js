@@ -50,8 +50,10 @@ function validateUserRequest(request, bodySchema) {
   };
 }
 
-function throwUserNotFound() {
-  throw new AppError("User not found", HTTP_STATUS.NOT_FOUND, "USER_NOT_FOUND");
+function throwServiceError(error) {
+  if (error.code === "USER_NOT_FOUND") {
+    throw new AppError(error.message, HTTP_STATUS.NOT_FOUND, error.code);
+  }
 }
 
 async function userRoutes(fastify, options) {
@@ -101,13 +103,13 @@ async function userRoutes(fastify, options) {
       createUserSchema,
     );
 
-    const updatedUser = updateUser(userId, validatedBody);
+    const result = updateUser(userId, validatedBody);
 
-    if (!updatedUser) {
-      throwUserNotFound();
+    if (!result.ok) {
+      throwServiceError(result.error);
     }
 
-    reply.code(HTTP_STATUS.OK).send(updatedUser);
+    reply.code(HTTP_STATUS.OK).send(result.data);
   });
 
   fastify.patch("/:id", async (request, reply) => {
@@ -118,19 +120,21 @@ async function userRoutes(fastify, options) {
 
     const updatedUser = updateUser(userId, validatedBody);
 
-    if (!updatedUser) {
-      throwUserNotFound();
+    const result = updateUser(userId, validatedBody);
+
+    if (!result.ok) {
+      throwServiceError(result.error);
     }
 
-    reply.code(HTTP_STATUS.OK).send(updatedUser);
+    reply.code(HTTP_STATUS.OK).send(result.data);
   });
 
   fastify.delete("/:id", async (request, reply) => {
     const validatedParams = parseOrThrow(userIdParamsSchema, request.params);
 
-    const deletedUser = deleteUser(validatedParams.id);
+    const result = deleteUser(validatedParams.id);
 
-    if (!deletedUser) {
+    if (!result.ok) {
       throwUserNotFound();
     }
 
