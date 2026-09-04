@@ -1,3 +1,5 @@
+import { formatUsers } from "./userFormatters.js";
+
 let users = [
   {
     id: 1,
@@ -20,12 +22,18 @@ function getNextUserId() {
   );
 }
 
-function findUserById(userId) {
+function findUserByIdOrUndefined(userId) {
   return users.find((user) => user.id === userId);
 }
 
 function getAllUsers() {
   return users;
+}
+
+function getFormattedUsers(userFormatter) {
+  const users = getAllUsers();
+
+  return formatUsers(users, userFormatter);
 }
 
 function createUser(userData) {
@@ -42,7 +50,7 @@ function createUser(userData) {
 }
 
 function updateUser(userId, userData) {
-  const existingUser = findUserById(userId);
+  const existingUser = findUserByIdOrUndefined(userId);
 
   if (!existingUser) {
     return null;
@@ -59,7 +67,7 @@ function updateUser(userId, userData) {
 }
 
 function deleteUser(userId) {
-  const existingUser = findUserById(userId);
+  const existingUser = findUserByIdOrUndefined(userId);
 
   if (!existingUser) {
     return null;
@@ -70,4 +78,4 @@ function deleteUser(userId) {
   return existingUser;
 }
 
-export { getAllUsers, createUser, updateUser, deleteUser };
+export { getAllUsers, getFormattedUsers, createUser, updateUser, deleteUser };

@@ -5,7 +5,7 @@ import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import userRoutes from "./routes/users.js";
 import cors from "@fastify/cors";
-import { detailedUserFormatter } from "./routes/userFormatters.js";
+import { detailedUserFormatter } from "./services/userFormatters.js";
 
 const fastify = Fastify({
   logger: true,
