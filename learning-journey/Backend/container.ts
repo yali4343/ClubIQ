@@ -1,7 +1,7 @@
 import { Lifecycle, container } from "tsyringe";
 import { AppLogger } from "./logging/index.js";
 
-import type { AppConfig } from "./AppConfig.js";
+import type { AppConfig } from "./config/appConfig.types.js";
 
 const appConfig: AppConfig = {
   environment: "development",
