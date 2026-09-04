@@ -1,7 +1,7 @@
 import AppError from "../errors/AppError.js";
 
 import {
-  getAllUsers,
+  getFormattedUsers,
   createUser,
   updateUser,
   deleteUser,
@@ -14,7 +14,7 @@ import {
   getValidationDetails,
 } from "./userValidation.js";
 
-import { formatUsers } from "./userFormatters.js";
+import { formatUsers } from "../services/userFormatters.js";
 
 const HTTP_STATUS = {
   OK: 200,
@@ -81,8 +81,7 @@ async function userRoutes(fastify, options) {
       },
     },
     async (request, reply) => {
-      const users = getAllUsers();
-      const formattedUsers = formatUsers(users, userFormatter);
+      const formattedUsers = getFormattedUsers(userFormatter);
 
       reply.code(HTTP_STATUS.OK).send(formattedUsers);
     },
