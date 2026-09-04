@@ -1,5 +1,5 @@
 import { inject, injectable } from "tsyringe";
-import type { Logger } from "./logging/Logger.js";
+import type { Logger } from "./logging/index.js";
 import { AppConfig } from "./AppConfig.js";
 
 @injectable()
