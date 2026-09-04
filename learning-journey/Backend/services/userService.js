@@ -20,12 +20,12 @@ function getNextUserId() {
   );
 }
 
-function getAllUsers() {
-  return users;
-}
-
 function findUserById(userId) {
   return users.find((user) => user.id === userId);
+}
+
+function getAllUsers() {
+  return users;
 }
 
 function createUser(userData) {
@@ -70,4 +70,4 @@ function deleteUser(userId) {
   return existingUser;
 }
 
-export { getAllUsers, getUserById, createUser, updateUser, deleteUser };
+export { getAllUsers, createUser, updateUser, deleteUser };
