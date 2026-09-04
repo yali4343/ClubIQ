@@ -1,4 +1,5 @@
 import AppError from "../errors/AppError.js";
+import { getAllUsers, createUser } from "../services/userService.js";
 
 import {
   createUserSchema,
@@ -16,19 +17,6 @@ const HTTP_STATUS = {
   NOT_FOUND: 404,
   UNPROCESSABLE_ENTITY: 422,
 };
-
-let users = [
-  {
-    id: 1,
-    name: "Yali",
-    age: 26,
-  },
-  {
-    id: 2,
-    name: "Daniel",
-    age: 24,
-  },
-];
 
 function getNextUserId(users) {
   return (
@@ -110,6 +98,7 @@ async function userRoutes(fastify, options) {
       },
     },
     async (request, reply) => {
+      const users = getAllUsers();
       const formattedUsers = formatUsers(users, userFormatter);
 
       reply.code(HTTP_STATUS.OK).send(formattedUsers);
@@ -119,14 +108,7 @@ async function userRoutes(fastify, options) {
   fastify.post("/", async (request, reply) => {
     const validatedUserData = parseOrThrow(createUserSchema, request.body);
 
-    const newUserId = getNextUserId(users);
-
-    const newUser = {
-      id: newUserId,
-      ...validatedUserData,
-    };
-
-    users = [...users, newUser];
+    const newUserId = createUser(validatedUserData);
 
     reply.code(HTTP_STATUS.CREATED).send(newUser);
   });
