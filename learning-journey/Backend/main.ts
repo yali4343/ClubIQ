@@ -1,0 +1,16 @@
+import "reflect-metadata";
+
+import { container } from "./container.js";
+import type { Logger } from "./Logger.js";
+import { StartupReporter } from "./StartupReporter.js";
+
+const firstLogger = container.resolve<Logger>("Logger");
+const secondLogger = container.resolve<Logger>("Logger");
+
+console.log("Same logger instance:", firstLogger === secondLogger);
+
+const startupReporter = container.resolve(StartupReporter);
+
+startupReporter.reportReady();
+
+await import("./server.js");
