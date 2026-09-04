@@ -12,7 +12,7 @@ import {
   userIdParamsSchema,
   updateUserSchema,
   getValidationDetails,
-} from "./userValidation.js";
+} from "../schemas/userValidation.js";
 
 import { formatUsers } from "../services/userFormatters.js";
 
