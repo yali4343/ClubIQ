@@ -3,7 +3,7 @@ import Fastify from "fastify";
 import AppError from "./errors/AppError.js";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
-import userRoutes from "./routes/users.js";
+import userRoutes from "./routes/userRoutes.js";
 import cors from "@fastify/cors";
 import { detailedUserFormatter } from "./services/userFormatters.js";
 
