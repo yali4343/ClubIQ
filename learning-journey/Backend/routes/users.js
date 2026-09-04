@@ -1,5 +1,11 @@
 import AppError from "../errors/AppError.js";
-import { getAllUsers, createUser } from "../services/userService.js";
+
+import {
+  getAllUsers,
+  createUser,
+  updateUser,
+  deleteUser,
+} from "../services/userService.js";
 
 import {
   createUserSchema,
@@ -17,19 +23,6 @@ const HTTP_STATUS = {
   NOT_FOUND: 404,
   UNPROCESSABLE_ENTITY: 422,
 };
-
-function getNextUserId(users) {
-  return (
-    users.reduce(
-      (highestId, currentUser) => Math.max(highestId, currentUser.id),
-      0,
-    ) + 1
-  );
-}
-
-function findUserById(users, userId) {
-  return users.find((user) => user.id === userId);
-}
 
 function parseOrThrow(schema, data) {
   const validationResult = schema.safeParse(data);
@@ -57,18 +50,8 @@ function validateUserRequest(request, bodySchema) {
   };
 }
 
-function getExistingUserOrThrow(users, userId) {
-  const existingUser = findUserById(users, userId);
-
-  if (!existingUser) {
-    throw new AppError(
-      "User not found",
-      HTTP_STATUS.NOT_FOUND,
-      "USER_NOT_FOUND",
-    );
-  }
-
-  return existingUser;
+function throwUserNotFound() {
+  throw new AppError("User not found", HTTP_STATUS.NOT_FOUND, "USER_NOT_FOUND");
 }
 
 async function userRoutes(fastify, options) {
@@ -108,7 +91,7 @@ async function userRoutes(fastify, options) {
   fastify.post("/", async (request, reply) => {
     const validatedUserData = parseOrThrow(createUserSchema, request.body);
 
-    const newUserId = createUser(validatedUserData);
+    const newUser = createUser(validatedUserData);
 
     reply.code(HTTP_STATUS.CREATED).send(newUser);
   });
@@ -119,14 +102,11 @@ async function userRoutes(fastify, options) {
       createUserSchema,
     );
 
-    const existingUser = getExistingUserOrThrow(users, userId);
+    const updatedUser = updateUser(userId, validatedBody);
 
-    const updatedUser = {
-      ...existingUser,
-      ...validatedBody,
-    };
-
-    users = users.map((user) => (user.id === userId ? updatedUser : user));
+    if (!updatedUser) {
+      throwUserNotFound();
+    }
 
     reply.code(HTTP_STATUS.OK).send(updatedUser);
   });
@@ -137,14 +117,11 @@ async function userRoutes(fastify, options) {
       updateUserSchema,
     );
 
-    const existingUser = getExistingUserOrThrow(users, userId);
+    const updatedUser = updateUser(userId, validatedBody);
 
-    const updatedUser = {
-      ...existingUser,
-      ...validatedBody,
-    };
-
-    users = users.map((user) => (user.id === userId ? updatedUser : user));
+    if (!updatedUser) {
+      throwUserNotFound();
+    }
 
     reply.code(HTTP_STATUS.OK).send(updatedUser);
   });
@@ -152,11 +129,11 @@ async function userRoutes(fastify, options) {
   fastify.delete("/:id", async (request, reply) => {
     const validatedParams = parseOrThrow(userIdParamsSchema, request.params);
 
-    const userId = validatedParams.id;
+    const deletedUser = deleteUser(validatedParams.id);
 
-    getExistingUserOrThrow(users, userId);
-
-    users = users.filter((user) => user.id !== userId);
+    if (!deletedUser) {
+      throwUserNotFound();
+    }
 
     reply.code(HTTP_STATUS.NO_CONTENT).send();
   });

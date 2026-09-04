@@ -20,6 +20,10 @@ function getNextUserId() {
   );
 }
 
+function findUserById(userId) {
+  return users.find((user) => user.id === userId);
+}
+
 function getAllUsers() {
   return users;
 }
@@ -37,4 +41,33 @@ function createUser(userData) {
   return newUser;
 }
 
-export { getAllUsers, createUser };
+function updateUser(userId, userData) {
+  const existingUser = findUserById(userId);
+
+  if (!existingUser) {
+    return null;
+  }
+
+  const updatedUser = {
+    ...existingUser,
+    ...userData,
+  };
+
+  users = users.map((user) => (user.id === userId ? updatedUser : user));
+
+  return updatedUser;
+}
+
+function deleteUser(userId) {
+  const existingUser = findUserById(userId);
+
+  if (!existingUser) {
+    return null;
+  }
+
+  users = users.filter((user) => user.id !== userId);
+
+  return existingUser;
+}
+
+export { getAllUsers, createUser, updateUser, deleteUser };
