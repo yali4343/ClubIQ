@@ -59,6 +59,12 @@ function throwServiceError(error) {
 async function userRoutes(fastify, options) {
   const { userFormatter } = options;
 
+  fastify.get("/formatted", async (request, reply) => {
+    const formattedUsers = getFormattedUsers(formatUsers, userFormatter);
+
+    reply.code(HTTP_STATUS.OK).send(formattedUsers);
+  });
+
   fastify.get(
     "/",
     {
@@ -83,7 +89,7 @@ async function userRoutes(fastify, options) {
       },
     },
     async (request, reply) => {
-      const formattedUsers = getFormattedUsers(userFormatter);
+      const formattedUsers = getFormattedUsers(formatUsers, userFormatter);
 
       reply.code(HTTP_STATUS.OK).send(formattedUsers);
     },

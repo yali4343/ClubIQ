@@ -1,5 +1,3 @@
-import { formatUsers } from "./userFormatters.js";
-
 const USER_SERVICE_ERROR = {
   USER_NOT_FOUND: {
     code: "USER_NOT_FOUND",
@@ -37,7 +35,7 @@ function getAllUsers() {
   return users;
 }
 
-function getFormattedUsers(userFormatter) {
+function getFormattedUsers(formatUsers, userFormatter) {
   const users = getAllUsers();
 
   return formatUsers(users, userFormatter);
