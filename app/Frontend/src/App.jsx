@@ -57,6 +57,7 @@ function App() {
     staleTime: 60_000,
   });
 
+  const [selectedLeague, setSelectedLeague] = useState("");
   const [selectedClubId, setSelectedClubId] = useState(null);
 
   if (clubsQuery.isPending) {
@@ -89,8 +90,16 @@ function App() {
     );
   }
 
+  const availableLeagues = [
+    ...new Set(clubsQuery.data.map((club) => club.league)),
+  ];
+  const filteredClubs = selectedLeague
+    ? clubsQuery.data.filter((club) => club.league === selectedLeague)
+    : [];
   const selectedClub =
-    clubsQuery.data.find((club) => club.id === selectedClubId) ?? null;
+    clubsQuery.data.find(
+      (club) => club.id === selectedClubId && club.league === selectedLeague,
+    ) ?? null;
   const selectedClubVisual = selectedClub
     ? getClubVisual(selectedClub.id)
     : neutralClubVisual;
@@ -183,6 +192,30 @@ function App() {
 
             <label
               className="mt-8 block text-sm font-semibold text-[#34443b]"
+              htmlFor="league-select"
+            >
+              League
+            </label>
+            <select
+              id="league-select"
+              className="club-select mt-2"
+              value={selectedLeague}
+              onChange={(event) => {
+                setSelectedLeague(event.target.value);
+                setSelectedClubId(null);
+              }}
+            >
+              <option value="">Select a league</option>
+
+              {availableLeagues.map((league) => (
+                <option key={league} value={league}>
+                  {league}
+                </option>
+              ))}
+            </select>
+
+            <label
+              className="mt-5 block text-sm font-semibold text-[#34443b]"
               htmlFor="club-select"
             >
               Club
@@ -190,6 +223,10 @@ function App() {
             <select
               id="club-select"
               className="club-select mt-2"
+              aria-describedby={
+                !selectedLeague ? "club-select-help" : undefined
+              }
+              disabled={!selectedLeague || filteredClubs.length === 0}
               value={selectedClubId ?? ""}
               onChange={(event) => {
                 const value = event.target.value;
@@ -199,12 +236,20 @@ function App() {
             >
               <option value="">Select a club</option>
 
-              {clubsQuery.data.map((club) => (
+              {filteredClubs.map((club) => (
                 <option key={club.id} value={club.id}>
                   {club.name} - {club.league}
                 </option>
               ))}
             </select>
+            {!selectedLeague && (
+              <p
+                id="club-select-help"
+                className="mt-2 text-sm leading-6 text-[#68736f]"
+              >
+                Select a league first.
+              </p>
+            )}
           </section>
         </div>
 
