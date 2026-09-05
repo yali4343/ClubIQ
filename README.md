@@ -1,7 +1,5 @@
-# Full-Stack Learning Project
+# Personalized Football Team Dashboard
 
-A hands-on full-stack project built while learning modern web development concepts and production-oriented practices.
+A full-stack football dashboard built as one continuous learning project.
 
-The project evolves incrementally as new backend, frontend, architecture, database, testing, security and deployment concepts are introduced.
-
-The goal is to learn by building, refactoring and improving one continuous application.
+The application is being developed incrementally with React, Fastify, and modern production-oriented architecture, with new capabilities added as the project evolves.
