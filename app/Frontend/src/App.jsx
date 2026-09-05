@@ -1,12 +1,16 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { getClubs } from "./api/clubsAPI.js";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { getClubs, selectClub } from "./api/clubsAPI.js";
 
 function App() {
   const clubsQuery = useQuery({
     queryKey: ["clubs"],
     queryFn: ({ signal }) => getClubs(signal),
     staleTime: 60_000,
+  });
+
+  const selectClubMutation = useMutation({
+    mutationFn: selectClub,
   });
 
   const [selectedClubId, setSelectedClubId] = useState(null);
@@ -55,9 +59,26 @@ function App() {
             </option>
           ))}
         </select>
+
         <button type="button" onClick={() => clubsQuery.refetch()}>
           Refresh clubs
         </button>
+
+        <button
+          type="button"
+          disabled={selectedClubId === null || selectClubMutation.isPending}
+          onClick={() => selectClubMutation.mutate(selectedClubId)}
+        >
+          {selectClubMutation.isPending ? "Saving..." : "Save selected club"}
+        </button>
+
+        {selectClubMutation.isError && (
+          <p>Failed to save club: {selectClubMutation.error.message}</p>
+        )}
+
+        {selectClubMutation.isSuccess && (
+          <p>Club selection saved successfully.</p>
+        )}
       </section>
 
       {selectedClub && (

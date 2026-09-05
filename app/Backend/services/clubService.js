@@ -49,6 +49,8 @@ const clubs = [
   },
 ];
 
+let selectedClubId = null;
+
 function getAllClubs() {
   return clubs;
 }
@@ -57,4 +59,16 @@ function getClubById(clubId) {
   return clubs.find((club) => club.id === clubId);
 }
 
-export { getAllClubs, getClubById };
+function selectClub(clubId) {
+  const club = getClubById(clubId);
+
+  if (!club) {
+    return null;
+  }
+
+  selectedClubId = clubId;
+
+  return club;
+}
+
+export { getAllClubs, getClubById, selectClub };

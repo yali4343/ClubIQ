@@ -4,4 +4,8 @@ const clubIdParamsSchema = z.object({
   id: z.coerce.number().int().positive(),
 });
 
-export { clubIdParamsSchema };
+const clubSelectionBodySchema = z.object({
+  clubId: z.coerce.number().int().positive(),
+});
+
+export { clubIdParamsSchema, clubSelectionBodySchema };
