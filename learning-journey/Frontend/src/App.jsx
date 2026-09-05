@@ -8,7 +8,13 @@ function App() {
     queryFn: ({ signal }) => getUsers(signal),
   });
 
-  console.log(usersQuery);
+  console.log({
+    data: usersQuery.data,
+    isPending: usersQuery.isPending,
+    isError: usersQuery.isError,
+    isSuccess: usersQuery.isSuccess,
+    error: usersQuery.error,
+  });
 
   const [users, setUsers] = useState([]);
 
@@ -133,6 +139,20 @@ function App() {
 
   return (
     <div>
+      <section>
+        <h2>React Query Status</h2>
+
+        {usersQuery.isPending && <p>Loading users...</p>}
+
+        {usersQuery.isError && (
+          <p>React Query error: {usersQuery.error.message}</p>
+        )}
+
+        {usersQuery.isSuccess && (
+          <p>React Query loaded {usersQuery.data.length} users.</p>
+        )}
+      </section>
+
       <h1>User Directory ({users.length} total)</h1>
 
       <h2>{editingUserId !== null ? "Edit User" : "Create User"}</h2>
