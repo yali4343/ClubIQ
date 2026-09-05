@@ -116,10 +116,6 @@ function App() {
         <header className="flex items-start justify-between gap-6 border-b border-[#cbd4cd] pb-6">
           <div>
             <p className="eyebrow">Matchday dashboard</p>
-            <h1 className="font-display text-4xl leading-none text-[#17201d] sm:text-6xl">
-              Your football,{" "}
-              <span className="text-[var(--club-primary)]">your club.</span>
-            </h1>
           </div>
         </header>
 
@@ -135,6 +131,7 @@ function App() {
                   <p className="eyebrow text-[var(--club-ink)]">
                     Selected club
                   </p>
+
                   <p
                     className="mt-2 max-w-xs text-sm leading-6 text-[#53645c]"
                     aria-live="polite"
@@ -143,9 +140,6 @@ function App() {
                       ? `${selectedClub.name} is selected.`
                       : "No club selected yet."}
                   </p>
-                </div>
-                <div className="club-mark" aria-hidden="true">
-                  {selectedClubVisual.initials}
                 </div>
               </div>
 
@@ -238,7 +232,7 @@ function App() {
 
               {filteredClubs.map((club) => (
                 <option key={club.id} value={club.id}>
-                  {club.name} - {club.league}
+                  {club.name}
                 </option>
               ))}
             </select>
