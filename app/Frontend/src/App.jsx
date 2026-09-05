@@ -1,6 +1,51 @@
 import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { getClubs, selectClub } from "./api/clubsAPI.js";
+import { getClubVisual, neutralClubVisual } from "./clubVisuals.js";
+
+const dashboardTitle = "Personalized Football Team Dashboard";
+
+function StatusMessage({ children, tone = "neutral" }) {
+  const toneClasses = {
+    neutral: "border-[#d8ded8] bg-white/60 text-[#52605a]",
+    success: "border-[#9bc7aa] bg-[#edf8ef] text-[#24613b]",
+    error: "border-[#e4aaa5] bg-[#fff0ef] text-[#8b2e2b]",
+  };
+
+  return (
+    <p
+      className={`border-l-2 px-3 py-2 text-sm ${toneClasses[tone]}`}
+      role={tone === "error" ? "alert" : "status"}
+      aria-live="polite"
+    >
+      {children}
+    </p>
+  );
+}
+
+function PreviewBlock({ title, description, className = "" }) {
+  return (
+    <section
+      className={`relative overflow-hidden border border-[#d8ded8] bg-[#fffefa] p-5 sm:p-6 ${className}`}
+      aria-label={`${title} preview`}
+    >
+      <div className="absolute right-0 top-0 h-16 w-16 border-b border-l border-[#d8ded8] bg-[#f1f4ef]" />
+      <div className="relative flex h-full min-h-32 flex-col justify-between gap-8">
+        <div>
+          <p className="mb-3 text-xs font-semibold tracking-[0.12em] text-[#6d7972]">
+            Preview
+          </p>
+          <h3 className="font-display text-2xl leading-none text-[#17201d]">
+            {title}
+          </h3>
+        </div>
+        <p className="max-w-sm text-sm leading-6 text-[#68736f]">
+          {description}
+        </p>
+      </div>
+    </section>
+  );
+}
 
 function App() {
   const clubsQuery = useQuery({
@@ -17,81 +62,223 @@ function App() {
 
   if (clubsQuery.isPending) {
     return (
-      <main>
-        <h1>Personalized Football Team Dashboard</h1>
-        <p>Loading clubs...</p>
+      <main className="dashboard-shell">
+        <div className="dashboard-frame">
+          <p className="eyebrow">Matchday dashboard</p>
+          <h1 className="font-display text-5xl leading-none text-[#17201d] sm:text-7xl">
+            {dashboardTitle}
+          </h1>
+          <StatusMessage>Loading clubs...</StatusMessage>
+        </div>
       </main>
     );
   }
 
   if (clubsQuery.isError) {
     return (
-      <main>
-        <h1>Personalized Football Team Dashboard</h1>
-        <p>Failed to load clubs: {clubsQuery.error.message}</p>
+      <main className="dashboard-shell">
+        <div className="dashboard-frame">
+          <p className="eyebrow">Matchday dashboard</p>
+          <h1 className="font-display text-5xl leading-none text-[#17201d] sm:text-7xl">
+            {dashboardTitle}
+          </h1>
+          <StatusMessage tone="error">
+            Failed to load clubs: {clubsQuery.error.message}
+          </StatusMessage>
+        </div>
       </main>
     );
   }
 
   const selectedClub =
     clubsQuery.data.find((club) => club.id === selectedClubId) ?? null;
+  const selectedClubVisual = selectedClub
+    ? getClubVisual(selectedClub.id)
+    : neutralClubVisual;
+  const dashboardStyle = {
+    "--club-primary": selectedClubVisual.primary,
+    "--club-secondary": selectedClubVisual.secondary,
+    "--club-ink": selectedClubVisual.ink,
+    "--club-wash": selectedClubVisual.wash,
+  };
 
   return (
-    <main>
-      <h1>Personalized Football Team Dashboard</h1>
+    <main className="dashboard-shell" style={dashboardStyle}>
+      <div className="dashboard-frame">
+        <header className="flex items-start justify-between gap-6 border-b border-[#cbd4cd] pb-6">
+          <div>
+            <p className="eyebrow">Matchday dashboard</p>
+            <h1 className="font-display text-4xl leading-none text-[#17201d] sm:text-6xl">
+              Your football,{" "}
+              <span className="text-[var(--club-primary)]">your club.</span>
+            </h1>
+          </div>
+          <button
+            className="control-button shrink-0"
+            type="button"
+            onClick={() => clubsQuery.refetch()}
+            disabled={clubsQuery.isFetching}
+          >
+            {clubsQuery.isFetching ? "Refreshing..." : "Refresh clubs"}
+          </button>
+        </header>
 
-      <section>
-        <h2>Choose your club</h2>
+        <div className="mt-8 grid gap-5 lg:grid-cols-[minmax(0,1.45fr)_minmax(18rem,0.55fr)]">
+          <section
+            className="selected-stage"
+            aria-labelledby="selected-club-heading"
+          >
+            <div className="stadium-lines" aria-hidden="true" />
+            <div className="relative flex min-h-[23rem] flex-col justify-between gap-10 p-6 sm:p-9">
+              <div className="flex items-start justify-between gap-5">
+                <div>
+                  <p className="eyebrow text-[var(--club-ink)]">
+                    Selected club
+                  </p>
+                  <p className="mt-2 max-w-xs text-sm leading-6 text-[#53645c]"></p>
+                </div>
+                <div className="club-mark" aria-hidden="true">
+                  {selectedClubVisual.initials}
+                </div>
+              </div>
 
-        <select
-          value={selectedClubId ?? ""}
-          onChange={(event) => {
-            const value = event.target.value;
+              <div>
+                <h2
+                  id="selected-club-heading"
+                  className="font-display max-w-3xl text-6xl leading-[0.86] text-[var(--club-ink)] sm:text-8xl"
+                >
+                  {selectedClub?.name ?? "Choose your club"}
+                </h2>
+                {selectedClub ? (
+                  <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm text-[#53645c]">
+                    <span>{selectedClub.league}</span>
+                    <span>{selectedClub.stadium}</span>
+                  </div>
+                ) : (
+                  <p className="mt-6 max-w-md text-sm leading-6 text-[#53645c]">
+                    Your club details and accent will appear here after you make
+                    a selection.
+                  </p>
+                )}
+              </div>
+            </div>
+          </section>
 
-            setSelectedClubId(value === "" ? null : Number(value));
-          }}
-        >
-          <option value="">Select a club</option>
+          <section
+            className="selector-panel"
+            aria-labelledby="club-selector-heading"
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="eyebrow">The selector</p>
+                <h2
+                  id="club-selector-heading"
+                  className="font-display text-3xl leading-none"
+                >
+                  Choose your club
+                </h2>
+              </div>
+              <span className="text-sm text-[#68736f]">
+                {clubsQuery.data.length} available
+              </span>
+            </div>
 
-          {clubsQuery.data.map((club) => (
-            <option key={club.id} value={club.id}>
-              {club.name} — {club.league}
-            </option>
-          ))}
-        </select>
+            <label
+              className="mt-8 block text-sm font-semibold text-[#34443b]"
+              htmlFor="club-select"
+            >
+              Club
+            </label>
+            <select
+              id="club-select"
+              className="club-select mt-2"
+              value={selectedClubId ?? ""}
+              onChange={(event) => {
+                const value = event.target.value;
 
-        <button type="button" onClick={() => clubsQuery.refetch()}>
-          Refresh clubs
-        </button>
+                setSelectedClubId(value === "" ? null : Number(value));
+              }}
+            >
+              <option value="">Select a club</option>
 
-        <button
-          type="button"
-          disabled={selectedClubId === null || selectClubMutation.isPending}
-          onClick={() => selectClubMutation.mutate(selectedClubId)}
-        >
-          {selectClubMutation.isPending ? "Saving..." : "Save selected club"}
-        </button>
+              {clubsQuery.data.map((club) => (
+                <option key={club.id} value={club.id}>
+                  {club.name} - {club.league}
+                </option>
+              ))}
+            </select>
 
-        {selectClubMutation.isError && (
-          <p>Failed to save club: {selectClubMutation.error.message}</p>
-        )}
+            <button
+              className="save-button mt-5 w-full"
+              type="button"
+              disabled={selectedClubId === null || selectClubMutation.isPending}
+              onClick={() => selectClubMutation.mutate(selectedClubId)}
+            >
+              {selectClubMutation.isPending
+                ? "Saving..."
+                : "Save selected club"}
+            </button>
 
-        {selectClubMutation.isSuccess && (
-          <p>Club selection saved successfully.</p>
-        )}
-      </section>
+            <div className="mt-4 min-h-12">
+              {selectClubMutation.isError && (
+                <StatusMessage tone="error">
+                  Failed to save club: {selectClubMutation.error.message}
+                </StatusMessage>
+              )}
 
-      {selectedClub && (
-        <section>
-          <h2>Your Team</h2>
+              {selectClubMutation.isSuccess && (
+                <StatusMessage tone="success">
+                  Club selection saved successfully.
+                </StatusMessage>
+              )}
+            </div>
+          </section>
+        </div>
 
-          <h3>{selectedClub.name}</h3>
+        <section className="mt-16" aria-labelledby="preview-heading">
+          <div className="mb-5 flex items-end justify-between gap-6 border-b border-[#cbd4cd] pb-4">
+            <div>
+              <p className="eyebrow">The next whistle</p>
+              <h2
+                id="preview-heading"
+                className="font-display text-4xl leading-none text-[#17201d]"
+              >
+                Matchday data
+              </h2>
+            </div>
+          </div>
 
-          <p>League: {selectedClub.league}</p>
+          <div className="grid gap-5 lg:grid-cols-[1.35fr_0.65fr]">
+            <PreviewBlock
+              title="Upcoming Matches"
+              description="Fixture information will appear here when match data is available."
+              className="min-h-56"
+            />
+            <PreviewBlock
+              title="League Position"
+              description="Standings data is coming soon."
+              className="min-h-56"
+            />
+          </div>
 
-          <p>Stadium: {selectedClub.stadium}</p>
+          <div className="mt-5 grid gap-5 md:grid-cols-2">
+            <PreviewBlock
+              title="Recent Results"
+              description="Recent match results will appear here in a future release."
+            />
+            <PreviewBlock
+              title="Team Form"
+              description="Form data will be available when the dashboard connects to match results."
+            />
+          </div>
+
+          <PreviewBlock
+            title="Club Overview"
+            description="More club information is coming soon. Your club's league and stadium are available above."
+            className="mt-5 min-h-40"
+          />
         </section>
-      )}
+      </div>
     </main>
   );
 }
