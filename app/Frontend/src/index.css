@@ -33,16 +33,6 @@ select {
   font: inherit;
 }
 
-button,
-select {
-  cursor: pointer;
-}
-
-button:disabled {
-  cursor: not-allowed;
-}
-
-button:focus-visible,
 select:focus-visible {
   outline: 3px solid var(--club-primary, #2f6651);
   outline-offset: 3px;
@@ -71,51 +61,6 @@ select:focus-visible {
   letter-spacing: 0.12em;
   line-height: 1.2;
   text-transform: uppercase;
-}
-
-.control-button,
-.save-button {
-  min-height: 2.75rem;
-  border: 1px solid #9aa99f;
-  padding: 0.65rem 1rem;
-  font-size: 0.875rem;
-  font-weight: 700;
-  transition:
-    background-color 150ms ease,
-    border-color 150ms ease,
-    color 150ms ease;
-}
-
-.control-button {
-  background: transparent;
-  color: #34443b;
-}
-
-.control-button:hover:not(:disabled) {
-  border-color: var(--club-primary);
-  color: var(--club-ink);
-}
-
-.control-button:disabled {
-  opacity: 0.6;
-}
-
-.save-button {
-  border-color: var(--club-primary);
-  background: var(--club-primary);
-  color: var(--club-ink);
-}
-
-.save-button:hover:not(:disabled) {
-  border-color: var(--club-ink);
-  background: var(--club-ink);
-  color: #fffefa;
-}
-
-.save-button:disabled {
-  border-color: #c8d1ca;
-  background: #e4e9e4;
-  color: #89948c;
 }
 
 .selected-stage {
@@ -165,6 +110,7 @@ select:focus-visible {
 }
 
 .club-select {
+  min-width: 0;
   min-height: 3rem;
   width: 100%;
   appearance: none;
@@ -182,6 +128,29 @@ select:focus-visible {
     0.35rem 0.35rem;
   padding: 0.75rem 2.5rem 0.75rem 0.85rem;
   color: #17201d;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.club-select:hover {
+  border-color: var(--club-primary);
+}
+
+.club-select:active {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--club-primary) 18%, transparent);
+}
+
+h1,
+h2,
+h3,
+p {
+  overflow-wrap: anywhere;
+}
+
+.selected-stage,
+.selector-panel {
+  min-width: 0;
 }
 
 @media (min-width: 640px) {
@@ -202,10 +171,6 @@ select:focus-visible {
   .dashboard-frame header {
     align-items: stretch;
     flex-direction: column;
-  }
-
-  .control-button {
-    width: 100%;
   }
 }
 

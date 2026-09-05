@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { getClubs, selectClub } from "./api/clubsAPI.js";
+import { useQuery } from "@tanstack/react-query";
+import { getClubs } from "./api/clubsAPI.js";
 import { getClubVisual, neutralClubVisual } from "./clubVisuals.js";
 
 const dashboardTitle = "Personalized Football Team Dashboard";
@@ -16,7 +16,7 @@ function StatusMessage({ children, tone = "neutral" }) {
     <p
       className={`border-l-2 px-3 py-2 text-sm ${toneClasses[tone]}`}
       role={tone === "error" ? "alert" : "status"}
-      aria-live="polite"
+      aria-live={tone === "error" ? "assertive" : "polite"}
     >
       {children}
     </p>
@@ -27,7 +27,7 @@ function PreviewBlock({ title, description, className = "" }) {
   return (
     <section
       className={`relative overflow-hidden border border-[#d8ded8] bg-[#fffefa] p-5 sm:p-6 ${className}`}
-      aria-label={`${title} preview`}
+      aria-labelledby={`${title.toLowerCase().replaceAll(" ", "-")}-heading`}
     >
       <div className="absolute right-0 top-0 h-16 w-16 border-b border-l border-[#d8ded8] bg-[#f1f4ef]" />
       <div className="relative flex h-full min-h-32 flex-col justify-between gap-8">
@@ -35,7 +35,10 @@ function PreviewBlock({ title, description, className = "" }) {
           <p className="mb-3 text-xs font-semibold tracking-[0.12em] text-[#6d7972]">
             Preview
           </p>
-          <h3 className="font-display text-2xl leading-none text-[#17201d]">
+          <h3
+            id={`${title.toLowerCase().replaceAll(" ", "-")}-heading`}
+            className="font-display text-2xl leading-none text-[#17201d]"
+          >
             {title}
           </h3>
         </div>
@@ -54,15 +57,11 @@ function App() {
     staleTime: 60_000,
   });
 
-  const selectClubMutation = useMutation({
-    mutationFn: selectClub,
-  });
-
   const [selectedClubId, setSelectedClubId] = useState(null);
 
   if (clubsQuery.isPending) {
     return (
-      <main className="dashboard-shell">
+      <main className="dashboard-shell" aria-busy="true">
         <div className="dashboard-frame">
           <p className="eyebrow">Matchday dashboard</p>
           <h1 className="font-display text-5xl leading-none text-[#17201d] sm:text-7xl">
@@ -113,14 +112,6 @@ function App() {
               <span className="text-[var(--club-primary)]">your club.</span>
             </h1>
           </div>
-          <button
-            className="control-button shrink-0"
-            type="button"
-            onClick={() => clubsQuery.refetch()}
-            disabled={clubsQuery.isFetching}
-          >
-            {clubsQuery.isFetching ? "Refreshing..." : "Refresh clubs"}
-          </button>
         </header>
 
         <div className="mt-8 grid gap-5 lg:grid-cols-[minmax(0,1.45fr)_minmax(18rem,0.55fr)]">
@@ -135,7 +126,14 @@ function App() {
                   <p className="eyebrow text-[var(--club-ink)]">
                     Selected club
                   </p>
-                  <p className="mt-2 max-w-xs text-sm leading-6 text-[#53645c]"></p>
+                  <p
+                    className="mt-2 max-w-xs text-sm leading-6 text-[#53645c]"
+                    aria-live="polite"
+                  >
+                    {selectedClub
+                      ? `${selectedClub.name} is selected.`
+                      : "No club selected yet."}
+                  </p>
                 </div>
                 <div className="club-mark" aria-hidden="true">
                   {selectedClubVisual.initials}
@@ -207,31 +205,6 @@ function App() {
                 </option>
               ))}
             </select>
-
-            <button
-              className="save-button mt-5 w-full"
-              type="button"
-              disabled={selectedClubId === null || selectClubMutation.isPending}
-              onClick={() => selectClubMutation.mutate(selectedClubId)}
-            >
-              {selectClubMutation.isPending
-                ? "Saving..."
-                : "Save selected club"}
-            </button>
-
-            <div className="mt-4 min-h-12">
-              {selectClubMutation.isError && (
-                <StatusMessage tone="error">
-                  Failed to save club: {selectClubMutation.error.message}
-                </StatusMessage>
-              )}
-
-              {selectClubMutation.isSuccess && (
-                <StatusMessage tone="success">
-                  Club selection saved successfully.
-                </StatusMessage>
-              )}
-            </div>
           </section>
         </div>
 
