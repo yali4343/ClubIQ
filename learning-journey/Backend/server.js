@@ -3,9 +3,8 @@ import Fastify from "fastify";
 import AppError from "./errors/AppError.js";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
-import userRoutes from "./routes/userRoutes.js";
 import cors from "@fastify/cors";
-import { detailedUserFormatter } from "./services/userFormatters.js";
+import clubRoutes from "./routes/clubRoutes.js";
 
 const fastify = Fastify({
   logger: true,
@@ -38,8 +37,8 @@ fastify.setNotFoundHandler((request, reply) => {
 fastify.register(swagger, {
   openapi: {
     info: {
-      title: "My API",
-      description: "REST API documentation",
+      title: "Personalized Football Team Dashboard API",
+      description: "REST API for the personalized football team dashboard",
       version: "1.0.0",
     },
     servers: [
@@ -68,9 +67,8 @@ fastify.addHook("preHandler", async (request, reply) => {
   console.log("preHandler:", request.method, request.url);
 });
 
-fastify.register(userRoutes, {
-  prefix: "/users",
-  userFormatter: detailedUserFormatter,
+fastify.register(clubRoutes, {
+  prefix: "/clubs",
 });
 
 fastify.get("/search", async (request, reply) => {
