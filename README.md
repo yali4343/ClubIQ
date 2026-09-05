@@ -1,5 +1,5 @@
-# Personalized Football Team Dashboard
+# ClubIQ
 
-A full-stack football dashboard built as one continuous learning project.
+A personalized football intelligence dashboard built as one continuous full-stack learning project.
 
-The application is being developed incrementally with React, Fastify, and modern production-oriented architecture, with new capabilities added as the project evolves.
+ClubIQ brings together relevant club information in one place, while evolving incrementally with React, Fastify, and production-oriented architecture.

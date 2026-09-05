@@ -282,7 +282,7 @@ function App() {
 
           <PreviewBlock
             title="Club Overview"
-            description="More club information is coming soon. Your club's league and stadium are available above."
+            description="More club information is coming soon. This will include squad details, club history, and more."
             className="mt-5 min-h-40"
           />
         </section>
