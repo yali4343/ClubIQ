@@ -11,3 +11,21 @@ export async function getClubs(signal) {
 
   return response.json();
 }
+
+export async function selectClub(clubId) {
+  const response = await fetch(`${CLUBS_URL}/selection`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      clubId,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to save club selection: ${response.status}`);
+  }
+
+  return response.json();
+}
