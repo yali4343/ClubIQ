@@ -171,7 +171,6 @@ function App() {
           >
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="eyebrow">The selector</p>
                 <h2
                   id="club-selector-heading"
                   className="font-display text-3xl leading-none"
@@ -179,9 +178,6 @@ function App() {
                   Choose your club
                 </h2>
               </div>
-              <span className="text-sm text-[#68736f]">
-                {clubsQuery.data.length} available
-              </span>
             </div>
 
             <label
