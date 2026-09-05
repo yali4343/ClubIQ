@@ -1,6 +1,15 @@
 import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { getUsers } from "./api/usersAPI.js";
 
 function App() {
+  const usersQuery = useQuery({
+    queryKey: ["users"],
+    queryFn: ({ signal }) => getUsers(signal),
+  });
+
+  console.log(usersQuery);
+
   const [users, setUsers] = useState([]);
 
   const [name, setName] = useState("");
@@ -71,9 +80,7 @@ function App() {
 
       if (isEditing) {
         setUsers((currentUsers) =>
-          currentUsers.map((user) =>
-            user.id === editingUserId ? data : user,
-          ),
+          currentUsers.map((user) => (user.id === editingUserId ? data : user)),
         );
       } else {
         setUsers((currentUsers) => [...currentUsers, data]);
@@ -97,22 +104,20 @@ function App() {
   }
 
   async function handleDelete(userId) {
-    const shouldDelete = window.confirm("Are you sure you want to delete this user?",
+    const shouldDelete = window.confirm(
+      "Are you sure you want to delete this user?",
     );
 
-    if (shouldDelete === false){
+    if (shouldDelete === false) {
       return;
     }
-    
+
     setError("");
 
     try {
-      const response = await fetch(
-        `http://localhost:3000/users/${userId}`,
-        {
-          method: "DELETE",
-        },
-      );
+      const response = await fetch(`http://localhost:3000/users/${userId}`, {
+        method: "DELETE",
+      });
 
       if (!response.ok) {
         throw new Error("Failed to delete user");
@@ -130,9 +135,7 @@ function App() {
     <div>
       <h1>User Directory ({users.length} total)</h1>
 
-      <h2>
-        {editingUserId !== null ? "Edit User" : "Create User"}
-      </h2>
+      <h2>{editingUserId !== null ? "Edit User" : "Create User"}</h2>
 
       <form onSubmit={handleSubmit}>
         <div>
@@ -168,11 +171,7 @@ function App() {
         </button>
 
         {editingUserId !== null && (
-          <button
-            type="button"
-            onClick={resetForm}
-            disabled={isSubmitting}
-          >
+          <button type="button" onClick={resetForm} disabled={isSubmitting}>
             Cancel
           </button>
         )}
