@@ -6,6 +6,7 @@ function App() {
   const clubsQuery = useQuery({
     queryKey: ["clubs"],
     queryFn: ({ signal }) => getClubs(signal),
+    staleTime: 60_000,
   });
 
   const [selectedClubId, setSelectedClubId] = useState(null);
@@ -54,6 +55,9 @@ function App() {
             </option>
           ))}
         </select>
+        <button type="button" onClick={() => clubsQuery.refetch()}>
+          Refresh clubs
+        </button>
       </section>
 
       {selectedClub && (
