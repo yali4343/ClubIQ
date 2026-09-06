@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { getClubs } from "./api/clubsAPI.js";
+import { useClubsQuery } from "./hooks/useClubsQuery.js";
 import { getClubVisual, neutralClubVisual } from "./clubVisuals.js";
 
 const dashboardTitle = "Personalized Football Team Dashboard";
@@ -51,11 +50,7 @@ function PreviewBlock({ title, description, className = "" }) {
 }
 
 function App() {
-  const clubsQuery = useQuery({
-    queryKey: ["clubs"],
-    queryFn: ({ signal }) => getClubs(signal),
-    staleTime: 60_000,
-  });
+  const clubsQuery = useClubsQuery();
 
   const [selectedLeague, setSelectedLeague] = useState("");
   const [selectedClubId, setSelectedClubId] = useState(null);
