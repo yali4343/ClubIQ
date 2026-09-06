@@ -1,4 +1,7 @@
-const clubs = [
+import { injectable } from "tsyringe";
+import type { Club, ClubService } from "./ClubService.js";
+
+const clubs: Club[] = [
   {
     id: 1,
     name: "Arsenal FC",
@@ -49,26 +52,27 @@ const clubs = [
   },
 ];
 
-let selectedClubId = null;
+@injectable()
+export class InMemoryClubService implements ClubService {
+  private selectedClubId: number | null = null;
 
-function getAllClubs() {
-  return clubs;
-}
-
-function getClubById(clubId) {
-  return clubs.find((club) => club.id === clubId);
-}
-
-function selectClub(clubId) {
-  const club = getClubById(clubId);
-
-  if (!club) {
-    return null;
+  getAllClubs(): Club[] {
+    return clubs;
   }
 
-  selectedClubId = clubId;
+  getClubById(clubId: number): Club | undefined {
+    return clubs.find((club) => club.id === clubId);
+  }
 
-  return club;
+  selectClub(clubId: number): Club | null {
+    const club = this.getClubById(clubId);
+
+    if (!club) {
+      return null;
+    }
+
+    this.selectedClubId = clubId;
+
+    return club;
+  }
 }
-
-export { getAllClubs, getClubById, selectClub };
