@@ -1,13 +1,11 @@
 import AppError from "../errors/AppError.js";
-import {
-  getAllClubs,
-  getClubById,
-  selectClub,
-} from "../services/clubService.js";
+import { container } from "../container.js";
 import {
   clubIdParamsSchema,
   clubSelectionBodySchema,
 } from "../schemas/clubSchemas.js";
+
+const clubService = container.resolve("ClubService");
 
 const HTTP_STATUS = {
   OK: 200,
@@ -54,7 +52,7 @@ async function clubRoutes(fastify) {
       },
     },
     async (request, reply) => {
-      const clubs = getAllClubs();
+      const clubs = clubService.getAllClubs();
 
       return reply.code(HTTP_STATUS.OK).send(clubs);
     },
@@ -72,7 +70,7 @@ async function clubRoutes(fastify) {
     async (request, reply) => {
       const { clubId } = parseClubSelectionOrThrow(request.body);
 
-      const club = selectClub(clubId);
+      const club = clubService.selectClub(clubId);
 
       if (!club) {
         throw new AppError(
@@ -98,7 +96,7 @@ async function clubRoutes(fastify) {
     async (request, reply) => {
       const clubId = parseClubIdOrThrow(request.params);
 
-      const club = getClubById(clubId);
+      const club = clubService.getClubById(clubId);
 
       if (!club) {
         throw new AppError(
