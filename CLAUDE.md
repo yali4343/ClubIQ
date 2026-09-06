@@ -19,10 +19,11 @@ Football-IQ is a production-style Full-Stack football dashboard and a continuous
 
 ### Workflow for a meaningful change
 
-inspect -> teach/understand -> propose a plan -> wait for approval -> implement -> verify -> explain the important decisions.
+inspect -> teach/understand -> propose a plan -> wait for approval -> implement -> verify -> explain the important decisions -> suggest a branch name and commit message.
 
 - Before implementation, explain the important architectural/product decisions that need to be understood up front.
 - Once a plan is approved, automate implementation, refactors, imports, and lint/build/tests - don't make the user do boilerplate or repetitive steps by hand. Leave committing, pushing, PRs, merging, and branch deletion to the user.
+- After explaining a completed set of changes, always propose a branch name and a concise commit message for them, since the user does the actual Git work themselves.
 - Ask understanding questions only when a concept is genuinely important for architecture, debugging, or interviews - not after every mechanical step.
 - Keep changes scoped to the current topic; avoid unrelated refactors.
 - Never claim verification succeeded unless the relevant checks were actually run.

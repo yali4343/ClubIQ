@@ -9,4 +9,5 @@ export interface ClubService {
   getAllClubs(): Club[];
   getClubById(clubId: number): Club | undefined;
   selectClub(clubId: number): Club | null;
+  getSelectedClub(): Club | null;
 }

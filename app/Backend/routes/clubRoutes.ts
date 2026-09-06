@@ -1,11 +1,14 @@
+import type { FastifyInstance, FastifyReply } from "fastify";
+
 import AppError from "../errors/AppError.js";
 import { container } from "../container.js";
 import {
   clubIdParamsSchema,
   clubSelectionBodySchema,
 } from "../schemas/clubSchemas.js";
+import type { ClubService } from "../services/index.js";
 
-const clubService = container.resolve("ClubService");
+const clubService = container.resolve<ClubService>("ClubService");
 
 const HTTP_STATUS = {
   OK: 200,
@@ -13,7 +16,7 @@ const HTTP_STATUS = {
   UNPROCESSABLE_ENTITY: 422,
 };
 
-function parseClubIdOrThrow(params) {
+function parseClubIdOrThrow(params: unknown): number {
   const validationResult = clubIdParamsSchema.safeParse(params);
 
   if (!validationResult.success) {
@@ -27,7 +30,7 @@ function parseClubIdOrThrow(params) {
   return validationResult.data.id;
 }
 
-function parseClubSelectionOrThrow(body) {
+function parseClubSelectionOrThrow(body: unknown) {
   const validationResult = clubSelectionBodySchema.safeParse(body);
 
   if (!validationResult.success) {
@@ -41,7 +44,19 @@ function parseClubSelectionOrThrow(body) {
   return validationResult.data;
 }
 
-async function clubRoutes(fastify) {
+function sendClubOrNotFound(club: unknown, reply: FastifyReply) {
+  if (!club) {
+    throw new AppError(
+      "Club not found",
+      HTTP_STATUS.NOT_FOUND,
+      "CLUB_NOT_FOUND",
+    );
+  }
+
+  return reply.code(HTTP_STATUS.OK).send(club);
+}
+
+async function clubRoutes(fastify: FastifyInstance) {
   fastify.get(
     "/",
     {
@@ -55,6 +70,22 @@ async function clubRoutes(fastify) {
       const clubs = clubService.getAllClubs();
 
       return reply.code(HTTP_STATUS.OK).send(clubs);
+    },
+  );
+
+  fastify.get(
+    "/selection",
+    {
+      schema: {
+        summary: "Get the selected club",
+        description: "Returns the currently selected football club, if any",
+        tags: ["Clubs"],
+      },
+    },
+    async (request, reply) => {
+      const club = clubService.getSelectedClub();
+
+      return reply.code(HTTP_STATUS.OK).send(club);
     },
   );
 
@@ -72,15 +103,7 @@ async function clubRoutes(fastify) {
 
       const club = clubService.selectClub(clubId);
 
-      if (!club) {
-        throw new AppError(
-          "Club not found",
-          HTTP_STATUS.NOT_FOUND,
-          "CLUB_NOT_FOUND",
-        );
-      }
-
-      return reply.code(HTTP_STATUS.OK).send(club);
+      return sendClubOrNotFound(club, reply);
     },
   );
 
@@ -98,15 +121,7 @@ async function clubRoutes(fastify) {
 
       const club = clubService.getClubById(clubId);
 
-      if (!club) {
-        throw new AppError(
-          "Club not found",
-          HTTP_STATUS.NOT_FOUND,
-          "CLUB_NOT_FOUND",
-        );
-      }
-
-      return reply.code(HTTP_STATUS.OK).send(club);
+      return sendClubOrNotFound(club, reply);
     },
   );
 }
