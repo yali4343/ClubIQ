@@ -75,4 +75,12 @@ export class InMemoryClubService implements ClubService {
 
     return club;
   }
+
+  getSelectedClub(): Club | null {
+    if (this.selectedClubId === null) {
+      return null;
+    }
+
+    return this.getClubById(this.selectedClubId) ?? null;
+  }
 }

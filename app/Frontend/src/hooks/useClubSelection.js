@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getSelectedClub, selectClub } from "../api/clubsAPI.js";
 
 const SUPPORTED_LEAGUES = [
   "Premier League",
@@ -8,28 +10,40 @@ const SUPPORTED_LEAGUES = [
 ];
 
 export function useClubSelection(clubs) {
+  const queryClient = useQueryClient();
   const [selectedLeague, setSelectedLeague] = useState("");
-  const [selectedClubId, setSelectedClubId] = useState(null);
+
+  const { data: selectedClub = null } = useQuery({
+    queryKey: ["selection"],
+    queryFn: ({ signal }) => getSelectedClub(signal),
+    staleTime: 60_000,
+  });
+
+  const {
+    mutate: selectClubById,
+    isPending: isSelecting,
+    error: selectionError,
+  } = useMutation({
+    mutationFn: selectClub,
+    onSuccess: (club) => {
+      queryClient.setQueryData(["selection"], club);
+    },
+  });
 
   function selectLeague(league) {
     setSelectedLeague(league);
-    setSelectedClubId(null);
   }
 
   const leagueClubs = selectedLeague
     ? clubs.filter((club) => club.league === selectedLeague)
     : [];
 
-  const selectedClub =
-    clubs.find(
-      (club) => club.id === selectedClubId && club.league === selectedLeague,
-    ) ?? null;
-
   return {
     selectedLeague,
     selectLeague,
-    selectedClubId,
-    setSelectedClubId,
+    selectClubById,
+    isSelecting,
+    selectionError,
     supportedLeagues: SUPPORTED_LEAGUES,
     leagueClubs,
     selectedClub,

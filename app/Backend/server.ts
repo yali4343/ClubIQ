@@ -15,7 +15,7 @@ fastify.setErrorHandler((error, request, reply) => {
     return reply.code(error.statusCode).send({
       code: error.code,
       message: error.message,
-      ...(error.details && { details: error.details }),
+      ...(error.details ? { details: error.details } : {}),
     });
   }
 
@@ -59,11 +59,11 @@ await fastify.register(swaggerUi, {
   routePrefix: "documentation",
 });
 
-fastify.addHook("onRequest", async (request, reply) => {
+fastify.addHook("onRequest", async (request) => {
   console.log("onRequest:", request.method, request.url);
 });
 
-fastify.addHook("preHandler", async (request, reply) => {
+fastify.addHook("preHandler", async (request) => {
   console.log("preHandler:", request.method, request.url);
 });
 
@@ -71,9 +71,10 @@ fastify.register(clubRoutes, {
   prefix: "/clubs",
 });
 
-fastify.get("/search", async (request, reply) => {
-  const page = request.query.page ?? "1";
-  const limit = request.query.limit ?? "10";
+fastify.get("/search", async (request) => {
+  const query = request.query as Record<string, string>;
+  const page = query.page ?? "1";
+  const limit = query.limit ?? "10";
 
   return { page, limit };
 });
@@ -84,7 +85,7 @@ await fastify.listen({
   port: Number(port),
 });
 
-const shutdown = async (signal) => {
+const shutdown = async (signal: string) => {
   console.log(`${signal} received. Shutting down server...`);
 
   try {
@@ -92,7 +93,7 @@ const shutdown = async (signal) => {
     console.log("Server closed");
     process.exit(0);
   } catch (error) {
-    fastify.log.error(error);
+    fastify.log.error(error as Error);
     process.exit(1);
   }
 };

@@ -55,8 +55,9 @@ function App() {
   const {
     selectedLeague,
     selectLeague,
-    selectedClubId,
-    setSelectedClubId,
+    selectClubById,
+    isSelecting,
+    selectionError,
     supportedLeagues,
     leagueClubs,
     selectedClub,
@@ -195,12 +196,18 @@ function App() {
               aria-describedby={
                 !selectedLeague ? "club-select-help" : undefined
               }
-              disabled={!selectedLeague || leagueClubs.length === 0}
-              value={selectedClubId ?? ""}
+              disabled={!selectedLeague || leagueClubs.length === 0 || isSelecting}
+              value={
+                leagueClubs.some((club) => club.id === selectedClub?.id)
+                  ? selectedClub.id
+                  : ""
+              }
               onChange={(event) => {
                 const value = event.target.value;
 
-                setSelectedClubId(value === "" ? null : Number(value));
+                if (value !== "") {
+                  selectClubById(Number(value));
+                }
               }}
             >
               <option value="">Select a club</option>
@@ -218,6 +225,11 @@ function App() {
               >
                 Select a league first.
               </p>
+            )}
+            {selectionError && (
+              <StatusMessage tone="error">
+                Failed to save your selection: {selectionError.message}
+              </StatusMessage>
             )}
           </section>
         </div>
