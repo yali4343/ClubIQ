@@ -1,5 +1,5 @@
-import { useState } from "react";
 import { useClubsQuery } from "./hooks/useClubsQuery.js";
+import { useClubSelection } from "./hooks/useClubSelection.js";
 import { getClubVisual, neutralClubVisual } from "./clubVisuals.js";
 
 const dashboardTitle = "Personalized Football Team Dashboard";
@@ -50,12 +50,16 @@ function PreviewBlock({ title, description, className = "" }) {
 }
 
 function App() {
-  const clubsQuery = useClubsQuery();
+  const { clubs, isLoading, error } = useClubsQuery();
 
-  const [selectedLeague, setSelectedLeague] = useState("");
-  const [selectedClubId, setSelectedClubId] = useState(null);
+  const {
+    selectedLeague,
+    setSelectedLeague,
+    selectedClubId,
+    setSelectedClubId,
+  } = useClubSelection();
 
-  if (clubsQuery.isPending) {
+  if (isLoading) {
     return (
       <main className="dashboard-shell" aria-busy="true">
         <div className="dashboard-frame">
@@ -69,7 +73,7 @@ function App() {
     );
   }
 
-  if (clubsQuery.isError) {
+  if (error) {
     return (
       <main className="dashboard-shell">
         <div className="dashboard-frame">
@@ -78,21 +82,19 @@ function App() {
             {dashboardTitle}
           </h1>
           <StatusMessage tone="error">
-            Failed to load clubs: {clubsQuery.error.message}
+            Failed to load clubs: {error.message}
           </StatusMessage>
         </div>
       </main>
     );
   }
 
-  const availableLeagues = [
-    ...new Set(clubsQuery.data.map((club) => club.league)),
-  ];
+  const availableLeagues = [...new Set(clubs.map((club) => club.league))];
   const filteredClubs = selectedLeague
-    ? clubsQuery.data.filter((club) => club.league === selectedLeague)
+    ? clubs.filter((club) => club.league === selectedLeague)
     : [];
   const selectedClub =
-    clubsQuery.data.find(
+    clubs.find(
       (club) => club.id === selectedClubId && club.league === selectedLeague,
     ) ?? null;
   const selectedClubVisual = selectedClub
@@ -120,12 +122,10 @@ function App() {
             aria-labelledby="selected-club-heading"
           >
             <div className="stadium-lines" aria-hidden="true" />
-            <div className="relative flex min-h-[23rem] flex-col justify-between gap-10 p-6 sm:p-9">
+            <div className="relative flex min-h-92 flex-col justify-between gap-10 p-6 sm:p-9">
               <div className="flex items-start justify-between gap-5">
                 <div>
-                  <p className="eyebrow text-[var(--club-ink)]">
-                    Selected club
-                  </p>
+                  <p className="eyebrow text-(--club-ink)">Selected club</p>
 
                   <p
                     className="mt-2 max-w-xs text-sm leading-6 text-[#53645c]"
@@ -141,7 +141,7 @@ function App() {
               <div>
                 <h2
                   id="selected-club-heading"
-                  className="font-display max-w-3xl text-6xl leading-[0.86] text-[var(--club-ink)] sm:text-8xl"
+                  className="font-display max-w-3xl text-6xl leading-[0.86] text-(--club-ink) sm:text-8xl"
                 >
                   {selectedClub?.name ?? "Choose your club"}
                 </h2>
