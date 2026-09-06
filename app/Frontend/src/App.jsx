@@ -54,9 +54,10 @@ function App() {
 
   const {
     selectedLeague,
-    setSelectedLeague,
+    selectLeague,
     selectedClubId,
     setSelectedClubId,
+    supportedLeagues,
   } = useClubSelection();
 
   if (isLoading) {
@@ -89,7 +90,6 @@ function App() {
     );
   }
 
-  const availableLeagues = [...new Set(clubs.map((club) => club.league))];
   const filteredClubs = selectedLeague
     ? clubs.filter((club) => club.league === selectedLeague)
     : [];
@@ -185,14 +185,11 @@ function App() {
               id="league-select"
               className="club-select mt-2"
               value={selectedLeague}
-              onChange={(event) => {
-                setSelectedLeague(event.target.value);
-                setSelectedClubId(null);
-              }}
+              onChange={(event) => selectLeague(event.target.value)}
             >
               <option value="">Select a league</option>
 
-              {availableLeagues.map((league) => (
+              {supportedLeagues.map((league) => (
                 <option key={league} value={league}>
                   {league}
                 </option>
