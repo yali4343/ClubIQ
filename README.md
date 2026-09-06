@@ -1,5 +1,5 @@
-# ClubIQ
+# Football-IQ
 
-A personalized football intelligence dashboard built as one continuous full-stack learning project.
+Football-IQ is a full-stack football dashboard for exploring club information across major European leagues.
 
-ClubIQ brings together relevant club information in one place, while evolving incrementally with React, Fastify, and production-oriented architecture.
+The project is built as a continuous learning project focused on production-style frontend, backend, architecture, performance, testing, and scalability.
