@@ -1,6 +1,6 @@
 import { useClubsQuery } from "./hooks/useClubsQuery.js";
 import { useClubSelection } from "./hooks/useClubSelection.js";
-import { getClubVisual, neutralClubVisual } from "./clubVisuals.js";
+import { useClubVisualTheme } from "./hooks/useClubVisualTheme.js";
 
 const dashboardTitle = "Personalized Football Team Dashboard";
 
@@ -58,7 +58,11 @@ function App() {
     selectedClubId,
     setSelectedClubId,
     supportedLeagues,
-  } = useClubSelection();
+    leagueClubs,
+    selectedClub,
+  } = useClubSelection(clubs);
+
+  const dashboardStyle = useClubVisualTheme(selectedClub);
 
   if (isLoading) {
     return (
@@ -89,23 +93,6 @@ function App() {
       </main>
     );
   }
-
-  const filteredClubs = selectedLeague
-    ? clubs.filter((club) => club.league === selectedLeague)
-    : [];
-  const selectedClub =
-    clubs.find(
-      (club) => club.id === selectedClubId && club.league === selectedLeague,
-    ) ?? null;
-  const selectedClubVisual = selectedClub
-    ? getClubVisual(selectedClub.id)
-    : neutralClubVisual;
-  const dashboardStyle = {
-    "--club-primary": selectedClubVisual.primary,
-    "--club-secondary": selectedClubVisual.secondary,
-    "--club-ink": selectedClubVisual.ink,
-    "--club-wash": selectedClubVisual.wash,
-  };
 
   return (
     <main className="dashboard-shell" style={dashboardStyle}>
@@ -208,7 +195,7 @@ function App() {
               aria-describedby={
                 !selectedLeague ? "club-select-help" : undefined
               }
-              disabled={!selectedLeague || filteredClubs.length === 0}
+              disabled={!selectedLeague || leagueClubs.length === 0}
               value={selectedClubId ?? ""}
               onChange={(event) => {
                 const value = event.target.value;
@@ -218,7 +205,7 @@ function App() {
             >
               <option value="">Select a club</option>
 
-              {filteredClubs.map((club) => (
+              {leagueClubs.map((club) => (
                 <option key={club.id} value={club.id}>
                   {club.name}
                 </option>
