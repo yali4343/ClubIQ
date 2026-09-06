@@ -5,10 +5,14 @@ import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import cors from "@fastify/cors";
 import clubRoutes from "./routes/clubRoutes.js";
+import { container } from "./container.js";
+import type { ClubService } from "./services/index.js";
 
 const fastify = Fastify({
   logger: true,
 });
+
+const clubService = container.resolve<ClubService>("ClubService");
 
 fastify.setErrorHandler((error, request, reply) => {
   if (error instanceof AppError) {
@@ -69,6 +73,7 @@ fastify.addHook("preHandler", async (request) => {
 
 fastify.register(clubRoutes, {
   prefix: "/clubs",
+  clubService,
 });
 
 fastify.get("/search", async (request) => {

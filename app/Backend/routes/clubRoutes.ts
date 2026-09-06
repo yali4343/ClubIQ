@@ -1,14 +1,15 @@
 import type { FastifyInstance, FastifyReply } from "fastify";
 
 import AppError from "../errors/AppError.js";
-import { container } from "../container.js";
 import {
   clubIdParamsSchema,
   clubSelectionBodySchema,
 } from "../schemas/clubSchemas.js";
 import type { ClubService } from "../services/index.js";
 
-const clubService = container.resolve<ClubService>("ClubService");
+interface ClubRoutesOptions {
+  clubService: ClubService;
+}
 
 const HTTP_STATUS = {
   OK: 200,
@@ -56,7 +57,9 @@ function sendClubOrNotFound(club: unknown, reply: FastifyReply) {
   return reply.code(HTTP_STATUS.OK).send(club);
 }
 
-async function clubRoutes(fastify: FastifyInstance) {
+async function clubRoutes(fastify: FastifyInstance, options: ClubRoutesOptions) {
+  const { clubService } = options;
+
   fastify.get(
     "/",
     {
