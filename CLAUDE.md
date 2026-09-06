@@ -13,9 +13,9 @@ Football-IQ is a production-style Full-Stack football dashboard and a continuous
 
 - `ProgramGoal.md` at the repo root is the source of truth for the learning roadmap, topic order, and scope. The repository itself is the source of truth for Football-IQ's current technical state.
 - Before proposing work for a learning topic, inspect both `ProgramGoal.md` and the relevant existing implementation.
-- Learning happens through real improvements to Football-IQ, not artificial exercises. For the current subtopic, prefer 1-3 meaningful changes that both improve the project and teach that concept.
+- Learning happens through real improvements to Football-IQ, not artificial exercises: propose 1-3 meaningful changes for the current subtopic that both improve the project and teach the concept, then wait for approval before implementing them.
 - Stay scoped to the current subtopic: don't pull in future ProgramGoal topics early just to make a solution look more advanced.
-- `/teach` grounds the teaching in the current ProgramGoal subtopic, the actual Football-IQ code, and the real improvement under consideration.
+- `/teach` is invoked by you, not something Claude calls on its own initiative; when invoked, ground it in the current subtopic and the real code under discussion.
 
 ### Workflow for a meaningful change
 
