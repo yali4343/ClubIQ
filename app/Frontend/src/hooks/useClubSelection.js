@@ -7,7 +7,7 @@ const SUPPORTED_LEAGUES = [
   "Bundesliga",
 ];
 
-export function useClubSelection() {
+export function useClubSelection(clubs) {
   const [selectedLeague, setSelectedLeague] = useState("");
   const [selectedClubId, setSelectedClubId] = useState(null);
 
@@ -16,11 +16,22 @@ export function useClubSelection() {
     setSelectedClubId(null);
   }
 
+  const leagueClubs = selectedLeague
+    ? clubs.filter((club) => club.league === selectedLeague)
+    : [];
+
+  const selectedClub =
+    clubs.find(
+      (club) => club.id === selectedClubId && club.league === selectedLeague,
+    ) ?? null;
+
   return {
     selectedLeague,
     selectLeague,
     selectedClubId,
     setSelectedClubId,
     supportedLeagues: SUPPORTED_LEAGUES,
+    leagueClubs,
+    selectedClub,
   };
 }
