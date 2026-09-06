@@ -7,7 +7,7 @@ Football-IQ is a production-style Full-Stack football dashboard and a continuous
 - Prefer changes with real product or architectural value over exercise-only features.
 - Do not introduce new technologies or abstractions without a clear current requirement.
 - Explain important implementation and architectural decisions so the changes remain understandable.
-- Git: once a plan is approved and verification has passed, routine branch/commit/push/PR/merge/cleanup work may proceed without asking each time. Still ask first before destructive or hard-to-reverse operations (force-push, `reset --hard`, history rewrites, branch deletion, etc.) or any Git action outside the approved plan.
+- Git: committing, pushing, creating/merging pull requests, and deleting branches are solely the user's responsibility. Claude must not run these actions itself (even after a plan is approved) unless the user explicitly asks in the moment. Claude may still run read-only Git commands (status, diff, log, etc.) freely to inspect state.
 
 ## Learning workflow
 
@@ -22,7 +22,7 @@ Football-IQ is a production-style Full-Stack football dashboard and a continuous
 inspect -> teach/understand -> propose a plan -> wait for approval -> implement -> verify -> explain the important decisions.
 
 - Before implementation, explain the important architectural/product decisions that need to be understood up front.
-- Once a plan is approved, automate implementation, refactors, imports, lint/build/tests, and routine Git work - don't make the user do boilerplate or repetitive steps by hand.
+- Once a plan is approved, automate implementation, refactors, imports, and lint/build/tests - don't make the user do boilerplate or repetitive steps by hand. Leave committing, pushing, PRs, merging, and branch deletion to the user.
 - Ask understanding questions only when a concept is genuinely important for architecture, debugging, or interviews - not after every mechanical step.
 - Keep changes scoped to the current topic; avoid unrelated refactors.
 - Never claim verification succeeded unless the relevant checks were actually run.
